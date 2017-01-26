@@ -5,7 +5,7 @@ i = 0
 
 def thread_1():
 	global i
-	for j in range(1000001):
+	for j in range(1000000):
 		with lock:
 			i+= 1
 
