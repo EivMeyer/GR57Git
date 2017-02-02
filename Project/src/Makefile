@@ -1,4 +1,4 @@
 CC=g++
 
-hellomake: main.cpp
-	$(CC) -o Main main.cpp -I
+hellomake: main.cpp network.h
+	$(CC) -o Main main.cpp network.h -I.
