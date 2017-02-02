@@ -1,6 +1,7 @@
 import network
+import sys
 
-mode = input("Vil du vaere server eller klient?")
+mode = sys.argv[1]
 
 if (mode == "server"):
 	network.server()
