@@ -26,8 +26,6 @@ void* thread_2(){
     return NULL;
 }
 
-
-
 int main(){
     pthread_t t1;
     pthread_t t2;
@@ -40,5 +38,4 @@ int main(){
     pthread_join(t2, NULL);
     printf("%d\n",i);
     return 0;
-    
 }
