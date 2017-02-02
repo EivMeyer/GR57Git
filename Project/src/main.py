@@ -1,6 +1,6 @@
 import network
 
-mode = input("Vil du være server eller klient?")
+mode = input("Vil du vaere server eller klient?")
 
 if (mode == "server"):
 	server()
