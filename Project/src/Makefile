@@ -1,18 +1,4 @@
-# the compiler: gcc for C program, define as g++ for C++
-  CC = g++
+CC=g++
 
-  # compiler flags:
-  #  -g    adds debugging information to the executable file
-  #  -Wall turns on most, but not all, compiler warnings
-  CFLAGS  = -g -Wall
-
-  # the build target executable:
-  TARGET = main
-
-  all: $(TARGET)
-
-  $(TARGET): $(TARGET).c
-  	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c
-
-  clean:
-  	$(RM) $(TARGET)
+hellomake: main.cpp network.cpp
+	$(CC) -o Main main.cpp network.cpp
