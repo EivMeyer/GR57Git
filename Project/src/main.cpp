@@ -5,6 +5,7 @@ using namespace std;
 
 int main(){
 	cout << "Hei" << endl;
-
+	cout << test() << "\n";
+	cout << "ferdig";
 	return 0;
 }
