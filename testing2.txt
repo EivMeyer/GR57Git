@@ -1,9 +1,0 @@
-oppgave 1
-a)
-En opperasjon er atomisk dersom den tilsynelatende er umiddelbar sett fra resten av systemet. Opperasjonen lykkes enten eller ikke, og kan ikke deles opp. (Må fullføre) Er kun en opperasjon.
-b)
-En semafor er en signalvariabel som kan brukes av alle trådene for å kontrollere tilgang. Den kan f.eks være lock/unlock(binær)
-c)
-En mutex er et gjensidig utelukkende flagg som kunn tillater en tråd av gangen. Det er for å hindre at flere koder kjøre samme kode samtidig.
-d)
-en kritisk seksjon kan kun utføres av en tråd om gangen.
