@@ -1,2 +1,5 @@
+CC=g++
+CFLAGS=-I.
+
 hellomake: main.cpp
-     g++ -o Main main.cpp -I.
+     $(CC) -o Main main.cpp -I.
