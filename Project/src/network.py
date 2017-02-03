@@ -2,41 +2,68 @@ import socket
 import time
 import threading
 
-connections = []
+connections = {}
 lock 		= threading.Lock()
 
-def listen_for_connections(serversocket):
-	global connections
+def tcp_chat():
+	# Only for debug purposes
 	while (True):
-		connection, address = serversocket.accept()
-		connections.append(connection)
-		print(str(address) + ' connected to the server')
-		
+		tcp_broadcast(input("Send en melding: "))
 
-def listen_for_messages():
+def tcp_receive():
 	global connections
 	while (True):
-		for connection in connections:
+		for address in connections:
+			connection = connections[address]
 			buf = connection.recv(64)
 			if (len(buf) > 0):
-				print(buf)
+				print(str(address) + ': ' + buf)
 
+def tcp_broadcast(msg):
+	global connections
+	for address in connections:
+		tcp_send(connection, msg)
+
+def tcp_send(connection, msg):
+	connection.send(msg)
+	
+def tcp_connection_listener(server_socket):
+	global connections
+	while (True):
+		connection, address = server_socket.accept()
+		connections[address] = connection
+		print(str(address) + ' connected to the server')
+		
 def server():
-	serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	serversocket.bind(('', 8090))
-	serversocket.listen(5) # become a server socket, maximum 5 connections
+	server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	server_socket.bind(('', 8090))
+	server_socket.listen(5) # Parameter = max connections
 
-	t1 = threading.Thread(target = listen_for_connections, args = ([serversocket]),)
-	t1.start()
+	threads = [
+		threading.Thread(target = tcp_connection_listener, 	args = ([server_socket])),
+		threading.Thread(target = tcp_receive, 				args = ())
+		threading.Thread(target = tcp_chat, 				args = ())
+	]
 
-	t2 = threading.Thread(target = listen_for_messages, args = (),)
-	t2.start()
+	for thread in threads:
+		thread.start()
+	
 
 def client():
-	clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	clientsocket.connect(('localhost', 8090))
+	ip = '129.241.187.159'
+	global connections
 
-	while (True):
-		clientsocket.send(input("Send en melding: "))
-		time.sleep(2)
+	clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	clientsocket.connect((ip, 8090))
+	connections[ip] = clientsocket
+
+	threads = [
+		threading.Thread(target = tcp_receive, 				args = ())
+		threading.Thread(target = tcp_chat, 				args = ())
+	]
+
+	for thread in threads:
+		thread.start()
+
+	
 
