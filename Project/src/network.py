@@ -9,7 +9,7 @@ lock 		= threading.Lock()
 def tcp_chat():
 	# Only for debug purposes
 	while (True):
-		tcp_broadcast(raw_input("Send en melding: "))
+		tcp_broadcast(raw_input(""))
 
 def tcp_receive():
 	global connections
@@ -18,7 +18,7 @@ def tcp_receive():
 			connection = connections[address]
 			buf = connection.recv(64)
 			if (len(buf) > 0):
-				print(str(address) + ': ' + buf)
+				print(str(address) + ': ' + buf + "\n")
 
 def tcp_broadcast(msg):
 	global connections
