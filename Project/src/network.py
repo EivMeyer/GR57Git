@@ -18,11 +18,12 @@ def listen_for_messages():
 	while (True):
 		for connection in connections:
 			buf = connection.recv(64)
-			print(buf)
+			if (len(buf) > 0):
+				print(buf)
 
 def server():
 	serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	serversocket.bind(('localhost', 8089))
+	serversocket.bind(('', 8090))
 	serversocket.listen(5) # become a server socket, maximum 5 connections
 
 	t1 = threading.Thread(target = listen_for_connections, args = ([serversocket]),)
@@ -33,10 +34,9 @@ def server():
 
 def client():
 	clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	clientsocket.connect(('localhost', 8089))
+	clientsocket.connect(('localhost', 8090))
 
 	while (True):
-		print("SEnding hello")
-		clientsocket.send('hello')
+		clientsocket.send(input("Send en melding: "))
 		time.sleep(2)
 
