@@ -2,7 +2,7 @@ import socket
 import time
 import threading
 
-PORT = 8098
+PORT = 8103
 connections = {}
 lock 		= threading.Lock()
 
@@ -14,6 +14,7 @@ def tcp_chat():
 def tcp_receive(address):
 	global connections
 	while (True):
+		print("Listening for messages from " + str(address))
 		connection = connections[address]
 		buf = connection.recv(64)
 		if (len(buf) > 0):
@@ -34,8 +35,8 @@ def tcp_connection_listener(server_socket):
 		connection, address = server_socket.accept()
 		connections[address] = connection
 		print(str(address) + ' connected to the server')
-		threading.Thread(target = tcp_receive, 				args = ([address])),
-		
+		t = threading.Thread(target = tcp_receive, 				args = ([address]))
+		t.start()
 def server():
 	global PORT
 	server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
