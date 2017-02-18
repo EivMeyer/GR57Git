@@ -4,12 +4,12 @@ def init():
 	orders = {}
 
 	# Initiating data structure for external orders
-	orders['external'] = []
-	for floor in range(0, config.NUM_FLOORS):
-		orders['external'].append([False, False])
+	orders['EXTERNAL'] = []
+	for floor in range(0, config.N_FLOORS):
+		orders['EXTERNAL'].append([False, False])
 
 	# Initiating data structure for internal orders
-	orders['internal'] = {}
+	orders['INTERNAL'] = {}
 
 	return orders
 

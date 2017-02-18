@@ -21,9 +21,17 @@ class EventHandler:
 		pass
 
 	def _on_new_external_order(self, data):
-		pass
+		print("New external order", data)
+		if (self.socket.is_master):
+			self.socket.tcp_broadcast(
+				title 		= 'NEW EXTERNAL ORDER',
+				data 		= data
+			)
+		else:
+			pass
 
 	def _on_new_internal_order(self, data):
+		print("New internal order", data)
 		pass
 
 	def _on_new_command(self, data):
@@ -73,9 +81,9 @@ class EventHandler:
 		elevator.Elevator.nodes[data['address']].floor = data['floor']
 
 	def _on_local_elev_reached_floor(self, data):
-		print('Local elevator reached floor ' + str(data))
+		print('Local elevator reached floor ' + str(data['floor']))
 
-		self.local_elev.floor = data
+		self.local_elev.floor = data['floor']
 
 		if (self.socket.is_master):
 			pass

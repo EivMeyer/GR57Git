@@ -2,6 +2,7 @@ from ctypes import *
 import threading
 import time
 import event
+import config
 import network
 
 class Elevator:
@@ -22,7 +23,28 @@ class LocalElevator(Elevator):
 
 			# Checking if elevator has reached a new floor
 			if (cur_floor != -1 and cur_floor != self.floor):
-				self.event_handler.actions['LOCAL ELEV REACHED FLOOR'](cur_floor)
+				self.event_handler.actions['LOCAL ELEV REACHED FLOOR']({'floor': cur_floor})
+
+			# Checking buttons
+			for floor in range(config.N_FLOORS):
+				for button in range(config.N_BUTTONS):
+					# Checking if button is pressed
+					if (self.api.elev_get_button_signal(c_int(button), c_int(floor))):
+						if (self.button_accessibility_states[floor][button]):
+							self.button_accessibility_states[floor][button] = False
+							if (button == 0):
+								# External - up
+								self.event_handler.actions['NEW EXTERNAL ORDER']({'floor': floor, 'direction': 1})
+
+							elif (button == 1):
+								# External - down
+								self.event_handler.actions['NEW EXTERNAL ORDER']({'floor': floor, 'direction': -1})
+
+							else:
+								# Internal
+								self.event_handler.actions['NEW INTERNAL ORDER']({'floor': floor})
+					else:
+						self.button_accessibility_states[floor][button] = True
 
 	def move_to(self, floor):
 		self.target = floor
@@ -51,6 +73,13 @@ class LocalElevator(Elevator):
 	def __init__(self):
 		Elevator.__init__(self)
 		self.api = cdll.LoadLibrary("../driver/elev_api.so")
+
+		self.button_accessibility_states = []
+		for floor in range(config.N_FLOORS):
+			self.button_accessibility_states.append([])
+			for button in range(config.N_BUTTONS):
+				self.button_accessibility_states[floor].append(True)
+
 		
 #local_elev.api.elev_set_motor_direction(c_int(1))
 #time.sleep(2)

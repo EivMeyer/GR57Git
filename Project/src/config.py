@@ -1,4 +1,5 @@
-NUM_FLOORS = 4
+N_FLOORS 	= 4
+N_BUTTONS 	= 3
 
 SERVER_HIERARCHY = [
 	#'10.22.64.233', # Eivind Laptop
