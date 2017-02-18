@@ -1,10 +1,9 @@
-from enum import Enum
 import network
 import sys
 import threading
 import scheduling
 
-class Events(Enum):
+class Events():
 	PING 					= 0
 	VITALS 					= 1
 	NEW_EXTERNAL_ORDER 		= 2
@@ -27,7 +26,8 @@ def handler(event, data):
 	elif (event == Events.SLAVE_CONNECTED):
 		network.Network.connections[data['address']] = data['connection']
 		print(str(data['address']) + ' connected to the server')
-		t = threading.Thread(target = network.tcp_receive, args = [data['address'], 'server'], daemon = True)
+		t = threading.Thread(target = network.tcp_receive, args = [data['address'], 'server'])
+		t.daemon = True
 		t.start()
 
 	elif (event == Events.SLAVE_DISCONNECTED):

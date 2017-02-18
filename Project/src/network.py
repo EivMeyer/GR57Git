@@ -7,9 +7,9 @@ from event import handler, Events
 class Network:
 	SERVER_HIERARCHY = [
 		#'10.22.64.233', # Eivind Laptop
-
+		'129.241.187.149', # Labplass 2
 		'129.241.206.238', # Kattelab 1
-		'129.241.206.223', #håkon kattelab
+		'129.241.206.223', #haakon kattelab
 		'129.241.187.159',
 		'129.241.187.158',
 		'129.241.187.161',
@@ -33,7 +33,7 @@ def tcp_chat():
 			msg = raw_input("")
 		except NameError:
 			msg = input("")
-		msg = bytes(msg, 'UTF-8')
+		msg = msg.encode('UTF-8')
 
 		tcp_broadcast(msg)
 
@@ -82,7 +82,7 @@ def tcp_send(connection, msg):
 	connection.send(msg)
 
 def udp_send(msg, address, port):
-	msg = bytes(msg, 'UTF-8')
+	msg = msg.encode('UTF-8')
 	udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	udp_socket.sendto(msg, (address, port))
 
@@ -100,6 +100,7 @@ def tcp_connection_listener(tcp_socket):
 
 def connect():
 	local_ip = get_local_ip()
+	print("Connecting as " + str(local_ip))
 
 	for ip in Network.SERVER_HIERARCHY:
 		time.sleep(0.1)
@@ -121,12 +122,13 @@ def server(local_ip):
 	tcp_socket.listen(5) # Parameter = max Network.connections
 
 	threads = [
-		threading.Thread(target = tcp_connection_listener, 	args = [tcp_socket], daemon = True),
-		threading.Thread(target = tcp_chat, 				args = (), daemon = True),
-		threading.Thread(target = udp_receive,				args = [Network.PORT, tcp_socket], daemon = True)
+		threading.Thread(target = tcp_connection_listener, 	args = [tcp_socket]),
+		threading.Thread(target = tcp_chat, 				args = ()),
+		threading.Thread(target = udp_receive,				args = [Network.PORT, tcp_socket])
 	]
 
 	for thread in threads:
+		thread.daemon = True
 		thread.start()
 
 	print("Server listening on " + str(Network.PORT))
@@ -153,11 +155,12 @@ def client(server_ip):
 	Network.connections[server_ip] = clientsocket
 
 	threads = [
-		threading.Thread(target = tcp_receive, 				args = [server_ip, 'client'], daemon = True),
-		threading.Thread(target = tcp_chat, 				args = (), daemon = True)
+		threading.Thread(target = tcp_receive, 				args = [server_ip, 'client']),
+		threading.Thread(target = tcp_chat, 				args = ())
 	]
 
 	for thread in threads:
+		thread.daemon = True
 		thread.start()
 
 	

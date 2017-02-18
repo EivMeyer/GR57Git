@@ -1,6 +1,7 @@
 import network
 import sys
 import event
+import hardware
 
 event.handler(event.Events.INIT, None)
 
