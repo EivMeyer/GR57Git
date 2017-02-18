@@ -1,22 +1,9 @@
 import socket
+import json
 import time
 import threading
+import config
 import time
-from event import handler, Events
-
-class Network:
-	SERVER_HIERARCHY = [
-		#'10.22.64.233', # Eivind Laptop
-		'129.241.187.149', # Labplass 2
-		'129.241.206.238', # Kattelab 1
-		'129.241.206.223', #haakon kattelab
-		'129.241.187.159',
-		'129.241.187.158',
-		'129.241.187.161',
-		'129.241.187.147'
-	]
-	PORT 			= 8114
-	connections 	= {}
 
 def get_local_ip():
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -25,143 +12,171 @@ def get_local_ip():
 	local_ip_address = s.getsockname()[0]
 	return local_ip_address
 
-def tcp_chat():
-	# Only for debug purposes
-	while (True):
-		# Fix Python 2.x
-		try:
-			msg = raw_input("")
-		except NameError:
-			msg = input("")
-		msg = msg.encode('UTF-8')
+class Socket:
+	def __init__(self):
+		self.port 			= None
+		self.event_handler 	= None
+		self.connections 	= {}
+		self.is_master 		= None
+		self.local_ip 		= None
+		self.server_ip 		= None
 
-		tcp_broadcast(msg)
-
-def tcp_receive(address, mode):
-	while (True):
-		#print("Listening for messages from " + str(address))
-		connection = Network.connections[address]
-		try:
-			buf = connection.recv(64)
-		except ConnectionResetError:
-			print("Connection lost")
-			if (mode == 'server'):
-				handler(Events.SLAVE_DISCONNECTED, {
-					'connection': 	connection,
-					'address': 		address
-				})
-			elif (mode == 'client'):
-				handler(Events.MASTER_DISCONNECTED, {
-					'connection': 	connection,
-					'address': 		address
-				})
-			return
-		msg = buf.decode('UTF-8')
-		if (len(msg) > 0):
-			print(str(address) + ': ' + msg + "\n")
-
-def udp_receive(port, tcp_socket):
-	udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	udp_socket.bind(('', port))
-
-	while True:
-		data = udp_socket.recv(64)
-		data = data.decode('UTF-8')
-		if (data == 'MASTER_CONNECTED'):
-			tcp_socket.close()
-			udp_socket.close()
-			handler(Events.MASTER_CONNECTED,None)
-			return
-
-def tcp_broadcast(msg):
-	for address in Network.connections:
-		connection = Network.connections[address]
-		tcp_send(connection, msg)
-
-def tcp_send(connection, msg):
-	connection.send(msg)
-
-def udp_send(msg, address, port):
-	msg = msg.encode('UTF-8')
-	udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	udp_socket.sendto(msg, (address, port))
-
-def tcp_connection_listener(tcp_socket):
-	while (True):
-		try:
-			connection, address = tcp_socket.accept()
-			handler(Events.SLAVE_CONNECTED, {
-				'connection': 	connection,
-				'address': 		address
-			})
-		except OSError:
-			# This means that the socket is closed
-			continue
-
-def connect():
-	local_ip = get_local_ip()
-	print("Connecting as " + str(local_ip))
-
-	for ip in Network.SERVER_HIERARCHY:
-		time.sleep(0.1)
-		if (ip == local_ip):
-			server(local_ip)
-			break
-		else:
+	def tcp_chat(self):
+		# Only for debug purposes
+		while (True):
+			# Fix Python 2.x
 			try:
-				client(ip)
+				message = raw_input("")
+			except NameError:
+				messsge = input("")
+			message = message.encode('UTF-8')
+
+			self.tcp_broadcast('CHAT', {'message': message})
+
+	def tcp_receive(self, address, mode):
+		while (True):
+			#print("Listening for messages from " + str(address))
+			connection = self.connections[address]
+			try:
+				buf = connection.recv(64)
+			except ConnectionResetError:
+				print("Connection lost")
+				if (mode == 'server'):
+					self.event_handler.actions['SLAVE DISCONNECTED']({
+						'connection': 	connection,
+						'address': 		address
+					})
+				elif (mode == 'client'):
+					self.event_handler.actions['MASTER DISCONNECTED']({
+						'connection': 	connection,
+						'address': 		address
+					})
+				return
+
+			try:
+				msg = json.loads(buf.decode('UTF-8'))
+				msg['data']['address'] = address
+				if (len(msg) > 0):
+					self.event_handler.actions[msg['title']](msg['data'])
+					#print('>> ' + str(address) + ': ' + msg + "\n")
+			except ValueError:
+				continue
+				print('Err', buf.decode('UTF-8'))
+
+	def udp_receive(self, tcp_socket):
+		udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		udp_socket.bind(('', self.port))
+
+		while True:
+			data = udp_socket.recv(64)
+			data = data.decode('UTF-8')
+			if (data == 'MASTER_CONNECTED'):
+				tcp_socket.close()
+				udp_socket.close()
+				self.event_handler.actions['MASTER CONNECTED'](None)
+				return
+
+	def udp_send(self, msg, address):
+		msg = msg.encode('UTF-8')
+		udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		udp_socket.sendto(msg, (address, self.port))
+
+	def tcp_broadcast(self, title, data):
+		for address in self.connections:
+			self.tcp_send(address, title, data)
+
+	def tcp_send(self, address, title, data):
+		connection = self.connections[address]
+		msg = {
+			'title': 	title,
+			'data': 	data
+		}
+		print('sending', msg)
+		connection.send(json.dumps(msg))
+
+	def tcp_connection_listener(self, tcp_socket):
+		while (True):
+			try:
+				connection, address = tcp_socket.accept()
+				self.event_handler.actions['SLAVE CONNECTED']({
+					'connection': 	connection,
+					'address': 		address
+				})
+			except OSError:
+				# This means that the socket is closed
+				continue
+
+	def connect(self, port):
+		self.port = port
+		self.local_ip = get_local_ip()
+		print("Connecting as " + str(self.local_ip))
+
+		for ip in config.SERVER_HIERARCHY:
+			time.sleep(0.1)
+			try:
+				self.client(ip)
 				print("Succesfully connected to " + str(ip))
 				break
 			except Exception as e:
 				print(str(ip) + " is not reachable")
+				print(e)
 				pass
 
-def server(local_ip):
-	tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	tcp_socket.bind(('', Network.PORT))
-	tcp_socket.listen(5) # Parameter = max Network.connections
+			if (ip == self.local_ip):
+				self.server()
+				break
 
-	threads = [
-		threading.Thread(target = tcp_connection_listener, 	args = [tcp_socket]),
-		threading.Thread(target = tcp_chat, 				args = ()),
-		threading.Thread(target = udp_receive,				args = [Network.PORT, tcp_socket])
-	]
+	def server(self):
+		self.is_master = True
 
-	for thread in threads:
-		thread.daemon = True
-		thread.start()
+		tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		tcp_socket.bind(('', self.port))
+		tcp_socket.listen(5) # Parameter = max self.connections
 
-	print("Server listening on " + str(Network.PORT))
+		threads = [
+			threading.Thread(target = self.tcp_connection_listener, 	args = [tcp_socket]),
+			threading.Thread(target = self.tcp_chat, 					args = ()),
+			threading.Thread(target = self.udp_receive,					args = [tcp_socket])
+		]
 
-	# Telling other machines to connect to this one
-	for i in range(Network.SERVER_HIERARCHY.index(local_ip) + 1, len(Network.SERVER_HIERARCHY)):
-		ip = Network.SERVER_HIERARCHY[i]
-		udp_send('MASTER_CONNECTED', ip, Network.PORT)
+		for thread in threads:
+			thread.daemon = True
+			thread.start()
 
-	
+		print("Server listening on " + str(self.port))
 
-def client(server_ip):
-	print("Connecting to " + server_ip + "...")
+		# Telling other machines to connect to this one
+		for i in range(config.SERVER_HIERARCHY.index(self.local_ip) + 1, len(config.SERVER_HIERARCHY)):
+			ip = config.SERVER_HIERARCHY[i]
+			self.udp_send('MASTER_CONNECTED', ip)
 
-	clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		
 
-	# Will throw an error if server isn't available
-	clientsocket.settimeout(1)
-	# Setting timeout so that it won't try to connect to the server forever
-	clientsocket.connect((server_ip, Network.PORT))
-	clientsocket.settimeout(None)
-	# Removing timeout so we don't get unwanted timeouts in tcp_receive
+	def client(self, server_ip):
+		print("Connecting to " + server_ip + "...")
 
-	Network.connections[server_ip] = clientsocket
+		clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-	threads = [
-		threading.Thread(target = tcp_receive, 				args = [server_ip, 'client']),
-		threading.Thread(target = tcp_chat, 				args = ())
-	]
+		# Will throw an error if server isn't available
+		clientsocket.settimeout(1)
+		# Setting timeout so that it won't try to connect to the server forever
+		clientsocket.connect((server_ip, self.port))
+		clientsocket.settimeout(None)
+		# Removing timeout so we don't get unwanted timeouts in tcp_receive
 
-	for thread in threads:
-		thread.daemon = True
-		thread.start()
+		self.connections[server_ip] = clientsocket
 
-	
+		threads = [
+			threading.Thread(target = self.tcp_receive, 				args = [server_ip, 'client']),
+			threading.Thread(target = self.tcp_chat, 					args = ())
+		]
+
+		for thread in threads:
+			thread.daemon = True
+			thread.start()
+
+		self.is_master = False
+		self.server_ip = server_ip
+
+		
 
