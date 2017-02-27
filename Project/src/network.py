@@ -38,7 +38,7 @@ class Socket:
 			#print("Listening for messages from " + str(address))
 			connection = self.connections[address]
 			try:
-				buf = connection.recv(64)
+				buf = connection.recv(640)
 			except ConnectionResetError:
 				print("Connection lost")
 				if (mode == 'server'):
@@ -58,7 +58,7 @@ class Socket:
 				msg['data']['address'] = address
 				if (len(msg) > 0):
 					self.event_handler.actions[msg['title']](msg['data'])
-					#print('>> ' + str(address) + ': ' + msg + "\n")
+					print('>> ', str(address), ': ',  msg,  "\n")
 			except ValueError:
 				continue
 				print('Err', buf.decode('UTF-8'))
@@ -68,7 +68,7 @@ class Socket:
 		udp_socket.bind(('', self.port))
 
 		while True:
-			data = udp_socket.recv(64)
+			data = udp_socket.recv(640)
 			data = data.decode('UTF-8')
 			if (data == 'MASTER_CONNECTED'):
 				tcp_socket.close()

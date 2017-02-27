@@ -20,18 +20,43 @@ class EventHandler:
 	def _on_vitals(self, data):
 		pass
 
-	def _on_new_external_order(self, data):
-		print("New external order", data)
+	def _on_new_local_external_order(self, data):
+		print("New local external order", data)
 		if (self.socket.is_master):
 			self.socket.tcp_broadcast(
-				title 		= 'NEW EXTERNAL ORDER',
+				title 		= 'NEW FOREIGN EXTERNAL ORDER',
 				data 		= data
 			)
 		else:
-			pass
+			self.socket.tcp_send(
+				address  	= self.socket.server_ip,
+				title 		= 'NEW FOREIGN EXTERNAL ORDER',
+				data 		= data,
+			)
 
-	def _on_new_internal_order(self, data):
-		print("New internal order", data)
+	def _on_new_local_internal_order(self, data):
+		print("New local internal order", data)
+		if (self.socket.is_master):
+			self.socket.tcp_broadcast(
+				title 		= 'NEW FOREIGN INTERNAL ORDER',
+				data 		= data
+			)
+		else:
+			self.socket.tcp_send(
+				address  	= self.socket.server_ip,
+				title 		= 'NEW FOREIGN INTERNAL ORDER',
+				data 		= data,
+			)
+
+	def _on_new_foreign_external_order(self, data):
+		print("New foreign external order", data)
+		self.order_matrix.external[data['floor']][data['direction']] = 1
+		pass
+
+	def _on_new_foreign_internal_order(self, data):
+		print("New foreign internal order", data)
+		self.order_matrix.internal[data['address']][data['floor']] = 1
+		print(self.order_matrix.internal)
 		pass
 
 	def _on_new_command(self, data):
@@ -52,21 +77,26 @@ class EventHandler:
 	def _on_slave_connected(self, data):
 		print(str(data['address']) + ' connected to the server')
 
+		# Assigning storage for internal orders
+		self.order_matrix.add_elevator(data['address'])
+
 		# Storing connection
 		self.socket.connections[data['address']] = data['connection']
 
-		# Creating listener thread
+		# Creating dedicated event listener thread
 		tcp_listener = threading.Thread(target = self.socket.tcp_receive, args = [data['address'], 'server'])
 		tcp_listener.daemon = True
 		tcp_listener.start()
 
-		# Creating elev instance
+		# Creating new instance of Elevator class
 		elevator.Elevator.nodes[data['address']] = elevator.Elevator()
 		#print(elevator.Elevator.nodes)
 
 	def _on_slave_disconnected(self, data):
 		print(str(data['address']) + ' disconnected from the server')
-		pass
+
+		# Deallocating storage for internal orders
+		self.order_matrix.remove_elevator(data['address']) 
 
 	def _on_master_connected(self, data):
 		self.socket.connect()
@@ -106,20 +136,23 @@ class EventHandler:
 			self.local_elev.target = -1
 
 	def __init__(self):
-		self.local_elev = None
-		self.socket 	= None
-		self.actions 	= {
-			'CHAT': 					self._on_chat,
-			'PING': 					self._on_ping,
-			'VITALS': 					self._on_vitals,
-			'NEW EXTERNAL ORDER': 		self._on_new_external_order,
-			'NEW INTERNAL ORDER': 		self._on_new_internal_order,
-			'NEW COMMAND': 				self._on_new_command,
-			'COMMAND COMPLETED': 		self._on_command_completed,
-			'SLAVE DISCONNECTED': 		self._on_slave_disconnected,
-			'SLAVE CONNECTED': 			self._on_slave_connected,
-			'MASTER CONNECTED': 		self._on_master_connected,
-			'MASTER DISCONNECTED': 		self._on_master_disconnected,
-			'ELEV POSITION UPDATE': 	self._on_elev_position_update,
-			'LOCAL ELEV REACHED FLOOR': self._on_local_elev_reached_floor,
+		self.local_elev 	= None
+		self.socket 		= None
+		self.order_matrix 	= None
+		self.actions 		= {
+			'CHAT': 						self._on_chat,
+			'PING': 						self._on_ping,
+			'VITALS': 						self._on_vitals,
+			'NEW LOCAL EXTERNAL ORDER': 	self._on_new_local_external_order,
+			'NEW LOCAL INTERNAL ORDER': 	self._on_new_local_internal_order,
+			'NEW FOREIGN EXTERNAL ORDER': 	self._on_new_foreign_external_order,
+			'NEW FOREIGN INTERNAL ORDER': 	self._on_new_foreign_internal_order,
+			'NEW COMMAND': 					self._on_new_command,
+			'COMMAND COMPLETED': 			self._on_command_completed,
+			'SLAVE DISCONNECTED': 			self._on_slave_disconnected,
+			'SLAVE CONNECTED': 				self._on_slave_connected,
+			'MASTER CONNECTED': 			self._on_master_connected,
+			'MASTER DISCONNECTED': 			self._on_master_disconnected,
+			'ELEV POSITION UPDATE': 		self._on_elev_position_update,
+			'LOCAL ELEV REACHED FLOOR': 	self._on_local_elev_reached_floor,
 		}

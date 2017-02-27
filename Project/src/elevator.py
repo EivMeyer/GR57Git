@@ -34,15 +34,15 @@ class LocalElevator(Elevator):
 							self.button_accessibility_states[floor][button] = False
 							if (button == 0):
 								# External - up
-								self.event_handler.actions['NEW EXTERNAL ORDER']({'floor': floor, 'direction': 1})
+								self.event_handler.actions['NEW LOCAL EXTERNAL ORDER']({'floor': floor, 'direction': 1})
 
 							elif (button == 1):
 								# External - down
-								self.event_handler.actions['NEW EXTERNAL ORDER']({'floor': floor, 'direction': -1})
+								self.event_handler.actions['NEW LOCAL EXTERNAL ORDER']({'floor': floor, 'direction': -1})
 
 							else:
 								# Internal
-								self.event_handler.actions['NEW INTERNAL ORDER']({'floor': floor})
+								self.event_handler.actions['NEW LOCAL INTERNAL ORDER']({'floor': floor})
 					else:
 						self.button_accessibility_states[floor][button] = True
 
