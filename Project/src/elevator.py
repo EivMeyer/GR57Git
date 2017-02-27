@@ -68,7 +68,8 @@ class LocalElevator(Elevator):
 		self.poller.start()
 
 		# Initial descent to the bottom
-		self.api.elev_set_motor_direction(c_int(-1))
+		self.floor = 10000000
+		self.move_to(0)
 
 	def __init__(self):
 		Elevator.__init__(self)

@@ -10,8 +10,7 @@ class EventHandler:
 	#   E V E N T S
 	# ----------------
 
-	def _on_chat(self, data):
-		# Only for debug purposes
+	def _on_chat(self, data): # DEBUG METHOD
 		print(data['address'], 'said', data['message'])
 
 	def _on_ping(self, data):
@@ -21,7 +20,7 @@ class EventHandler:
 		pass
 
 	def _on_new_local_external_order(self, data):
-		print("New local external order", data)
+		print('New local external order (floor: ' + str(data['floor']) + ', direction: ' + str(data['direction']) + ')')
 		if (self.socket.is_master):
 			self.socket.tcp_broadcast(
 				title 		= 'NEW FOREIGN EXTERNAL ORDER',
@@ -35,7 +34,7 @@ class EventHandler:
 			)
 
 	def _on_new_local_internal_order(self, data):
-		print("New local internal order", data)
+		print('New local internal order (floor: ' + str(data['floor']) + ')')
 		if (self.socket.is_master):
 			self.socket.tcp_broadcast(
 				title 		= 'NEW FOREIGN INTERNAL ORDER',
@@ -49,30 +48,50 @@ class EventHandler:
 			)
 
 	def _on_new_foreign_external_order(self, data):
-		print("New foreign external order", data)
-		self.order_matrix.external[data['floor']][data['direction']] = 1
-		pass
+		print('New foreign external order: (floor: ' + str(data['floor']) + ', direction: ' + str(data['direction']) + ')')
+		if (self.socket.is_master):
+			self.order_matrix.external[data['floor']][data['direction']] = 1
+			self.socket.tcp_broadcast(
+				title 		= 'NEW FOREIGN EXTERNAL ORDER',
+				data 		= data
+			)
+		else:
+			self.order_matrix.external[data['floor']][data['direction']] = 1
+
 
 	def _on_new_foreign_internal_order(self, data):
-		print("New foreign internal order", data)
-		self.order_matrix.internal[data['address']][data['floor']] = 1
-		print(self.order_matrix.internal)
-		pass
-
-	def _on_new_command(self, data):
-		print('received new command', data)
-		self.local_elev.move_to(data['floor'])
-
-	def _on_command_completed(self, data):
-		print('command completed')
+		print('New foreign internal order (floor: ' + str(data['floor']) + ')')
 		if (self.socket.is_master):
+
 			self.socket.tcp_send(
 				address 	= data['address'],
 				title 		= 'NEW COMMAND',
-				data 		= {'floor': (data['floor']+1)%4}
+				data 		= {'floor': data['floor']}
+			)
+
+			self.order_matrix.internal[data['address']][data['floor']] = 1
+			self.socket.tcp_broadcast(
+				title 		= 'NEW FOREIGN INTERNAL ORDER',
+				data 		= data
 			)
 		else:
-			pass
+			self.order_matrix.internal[data['address']][data['floor']] = 1
+		
+
+	def _on_new_command(self, data):
+		print('Received command (floor: ' + str(data['floor']) + ')')
+		self.local_elev.move_to(data['floor'])
+
+	def _on_command_completed(self, data):
+		print('Command completed (floor ' + str(data['floor']) + ')')
+		# if (self.socket.is_master):
+		# 	# self.socket.tcp_send(
+		# 	# 	address 	= data['address'],
+		# 	# 	title 		= 'NEW COMMAND',
+		# 	# 	data 		= {'floor': (data['floor']+1)%4}
+		# 	# )
+		# else:
+		# 	pass
 
 	def _on_slave_connected(self, data):
 		print(str(data['address']) + ' connected to the server')
@@ -80,20 +99,29 @@ class EventHandler:
 		# Assigning storage for internal orders
 		self.order_matrix.add_elevator(data['address'])
 
-		# Storing connection
-		self.socket.connections[data['address']] = data['connection']
+		if (self.socket.is_master):
 
-		# Creating dedicated event listener thread
-		tcp_listener = threading.Thread(target = self.socket.tcp_receive, args = [data['address'], 'server'])
-		tcp_listener.daemon = True
-		tcp_listener.start()
+			# Storing connection
+			self.socket.connections[data['address']] = data['connection']
 
-		# Creating new instance of Elevator class
-		elevator.Elevator.nodes[data['address']] = elevator.Elevator()
-		#print(elevator.Elevator.nodes)
+			# Creating dedicated event listener thread
+			tcp_listener = threading.Thread(target = self.socket.tcp_receive, args = [data['address'], 'server'])
+			tcp_listener.daemon = True
+			tcp_listener.start()
+
+			# Creating new instance of Elevator class
+			elevator.Elevator.nodes[data['address']] = elevator.Elevator()
+
+			# Notifying existing clients about new connection
+			self.socket.tcp_broadcast(
+				title 	= 'SLAVE CONNECTED',
+				data 	= {
+					'address': data['address']
+				}
+			)
 
 	def _on_slave_disconnected(self, data):
-		print(str(data['address']) + ' disconnected from the server')
+		print(str(data['address'][0]) + ' disconnected from the server')
 
 		# Deallocating storage for internal orders
 		self.order_matrix.remove_elevator(data['address']) 
@@ -107,7 +135,7 @@ class EventHandler:
 		pass
 
 	def _on_elev_position_update(self, data):
-		print(data['address'], 'is now at floor ' + str(data['floor']))
+		print(data['address'][0], 'is now at floor ' + str(data['floor']))
 		elevator.Elevator.nodes[data['address']].floor = data['floor']
 
 	def _on_local_elev_reached_floor(self, data):
@@ -124,10 +152,12 @@ class EventHandler:
 				data 		= {'floor': self.local_elev.floor}
 			)
 
-		if (self.local_elev.floor == self.local_elev.target or self.local_elev.target == -1):
+		if (self.local_elev.floor == self.local_elev.target):
 			if (self.socket.is_master):
 				pass
 			else:
+				print("Reached target")
+				self.local_elev.stop()
 				self.socket.tcp_send(
 					address 	= self.socket.server_ip,
 					title 		= 'COMMAND COMPLETED',

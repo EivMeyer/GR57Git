@@ -2,6 +2,7 @@ import socket
 import json
 import time
 import threading
+import sys
 import config
 import time
 
@@ -26,21 +27,47 @@ class Socket:
 		while (True):
 			# Fix Python 2.x
 			try:
-				message = raw_input("")
+				message = raw_input('')
 			except NameError:
-				messsge = input("")
+				messsge = input('')
 			message = message.encode('UTF-8')
 
 			self.tcp_broadcast('CHAT', {'message': message})
 
 	def tcp_receive(self, address, mode):
 		while (True):
-			#print("Listening for messages from " + str(address))
+			#print('Listening for messages from ' + str(address))
 			connection = self.connections[address]
+			buf = connection.recv(240)
+
+			# except ConnectionResetError:
+			# 	print('Connection lost')
+			# 	if (mode == 'server'):
+			# 		self.event_handler.actions['SLAVE DISCONNECTED']({
+			# 			'connection': 	connection,
+			# 			'address': 		address
+			# 		})
+			# 	elif (mode == 'client'):
+			# 		self.event_handler.actions['MASTER DISCONNECTED']({
+			# 			'connection': 	connection,
+			# 			'address': 		address
+			# 		})
+			# 	return
+
 			try:
-				buf = connection.recv(640)
-			except ConnectionResetError:
-				print("Connection lost")
+				messages = str(buf.decode('UTF-8')).split('//')
+				for message in messages:
+					if (len(message) > 0):
+						print('\nMSG: ' + str(address) + ' >> ' + message + '\n')
+						msg = json.loads(message)
+						msg['data']['address'] = address
+						self.event_handler.actions[msg['title']](msg['data'])
+					
+			except ValueError as e:
+				print(msg)
+				print("ERROR: ", e)
+				
+				print('Connection lost')
 				if (mode == 'server'):
 					self.event_handler.actions['SLAVE DISCONNECTED']({
 						'connection': 	connection,
@@ -53,22 +80,12 @@ class Socket:
 					})
 				return
 
-			try:
-				msg = json.loads(buf.decode('UTF-8'))
-				msg['data']['address'] = address
-				if (len(msg) > 0):
-					self.event_handler.actions[msg['title']](msg['data'])
-					print('>> ', str(address), ': ',  msg,  "\n")
-			except ValueError:
-				continue
-				print('Err', buf.decode('UTF-8'))
-
 	def udp_receive(self, tcp_socket):
 		udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		udp_socket.bind(('', self.port))
 
 		while True:
-			data = udp_socket.recv(640)
+			data = udp_socket.recv(240)
 			data = data.decode('UTF-8')
 			if (data == 'MASTER_CONNECTED'):
 				tcp_socket.close()
@@ -91,8 +108,9 @@ class Socket:
 			'title': 	title,
 			'data': 	data
 		}
-		print('sending', msg)
-		connection.send(json.dumps(msg))
+		msg = json.dumps(msg) + '//'
+		print('// sending', msg)
+		connection.send(msg.encode('UTF-8'))
 
 	def tcp_connection_listener(self, tcp_socket):
 		while (True):
@@ -109,16 +127,16 @@ class Socket:
 	def connect(self, port):
 		self.port = port
 		self.local_ip = get_local_ip()
-		print("Connecting as " + str(self.local_ip))
+		print('Connecting as ' + str(self.local_ip))
 
 		for ip in config.SERVER_HIERARCHY:
 			time.sleep(0.1)
 			try:
 				self.client(ip)
-				print("Succesfully connected to " + str(ip))
+				print('Succesfully connected to ' + str(ip))
 				break
 			except Exception as e:
-				print(str(ip) + " is not reachable")
+				print(str(ip) + ' is not reachable')
 				print(e)
 				pass
 
@@ -143,17 +161,21 @@ class Socket:
 			thread.daemon = True
 			thread.start()
 
-		print("Server listening on " + str(self.port))
+		# Setting terminal title 
+		sys.stdout.write('\x1b];' + 'SERVER' + '\x07')
 
+		print('Server listening on ' + str(self.port))
+	
 		# Telling other machines to connect to this one
 		for i in range(config.SERVER_HIERARCHY.index(self.local_ip) + 1, len(config.SERVER_HIERARCHY)):
 			ip = config.SERVER_HIERARCHY[i]
 			self.udp_send('MASTER_CONNECTED', ip)
 
+
 		
 
 	def client(self, server_ip):
-		print("Connecting to " + server_ip + "...")
+		print('Connecting to ' + server_ip + '...')
 
 		clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -177,6 +199,9 @@ class Socket:
 
 		self.is_master = False
 		self.server_ip = server_ip
+
+		# Setting terminal title 
+		sys.stdout.write('\x1b];' + 'CLIENT' + '\x07')
 
 		
 
