@@ -55,6 +55,16 @@ class EventHandler:
 				title 		= 'NEW FOREIGN EXTERNAL ORDER',
 				data 		= data
 			)
+
+			self.scheduler.create_command_matrix()
+			new_command = self.scheduler.get_next_command(data['address'])
+
+			if (new_command > -1):
+				self.socket.tcp_send(
+					address 	= data['address'],
+					title 		= 'NEW COMMAND',
+					data 		= {'floor': new_command}
+				)
 		else:
 			self.order_matrix.external[data['floor']][data['direction']] = 1
 
@@ -62,18 +72,24 @@ class EventHandler:
 	def _on_new_foreign_internal_order(self, data):
 		print('New foreign internal order (floor: ' + str(data['floor']) + ')')
 		if (self.socket.is_master):
-
-			self.socket.tcp_send(
-				address 	= data['address'],
-				title 		= 'NEW COMMAND',
-				data 		= {'floor': data['floor']}
-			)
-
-			self.order_matrix.internal[data['address']][data['floor']] = 1
 			self.socket.tcp_broadcast(
 				title 		= 'NEW FOREIGN INTERNAL ORDER',
 				data 		= data
 			)
+
+
+			self.order_matrix.internal[data['address']][data['floor']] = 1
+			self.scheduler.create_command_matrix()
+
+			new_command = self.scheduler.get_next_command(data['address'])
+
+			if (new_command > -1):
+				self.socket.tcp_send(
+					address 	= data['address'],
+					title 		= 'NEW COMMAND',
+					data 		= {'floor': new_command}
+				)
+			
 		else:
 			self.order_matrix.internal[data['address']][data['floor']] = 1
 		
@@ -83,15 +99,20 @@ class EventHandler:
 		self.local_elev.move_to(data['floor'])
 
 	def _on_command_completed(self, data):
-		print('Command completed (floor ' + str(data['floor']) + ')')
-		# if (self.socket.is_master):
-		# 	# self.socket.tcp_send(
-		# 	# 	address 	= data['address'],
-		# 	# 	title 		= 'NEW COMMAND',
-		# 	# 	data 		= {'floor': (data['floor']+1)%4}
-		# 	# )
-		# else:
-		# 	pass
+		print('Command completed (floor ' + str(data['floor']) + 'dir: ' + str(data['dir']) + ')')
+		self.order_matrix.internal[data['address']][data['floor']] = 0
+		self.order_matrix.external[data['floor']][data['dir']] = 0
+		if (self.socket.is_master):
+			new_command = self.scheduler.get_next_command(data['address'])
+
+			if (new_command > -1):
+				self.socket.tcp_send(
+					address 	= data['address'],
+					title 		= 'NEW COMMAND',
+					data 		= {'floor': new_command}
+				)
+		else:
+			pass
 
 	def _on_slave_connected(self, data):
 		print(str(data['address']) + ' connected to the server')
@@ -136,12 +157,14 @@ class EventHandler:
 
 	def _on_elev_position_update(self, data):
 		print(data['address'][0], 'is now at floor ' + str(data['floor']))
-		elevator.Elevator.nodes[data['address']].floor = data['floor']
+		try:
+			elevator.Elevator.nodes[data['address']].floor = data['floor']
+		except KeyError as e:
+			print(e)
+			print('ignoring...')
 
 	def _on_local_elev_reached_floor(self, data):
 		print('Local elevator reached floor ' + str(data['floor']))
-
-		self.local_elev.floor = data['floor']
 
 		if (self.socket.is_master):
 			pass
@@ -157,18 +180,39 @@ class EventHandler:
 				pass
 			else:
 				print("Reached target")
-				self.local_elev.stop()
 				self.socket.tcp_send(
 					address 	= self.socket.server_ip,
 					title 		= 'COMMAND COMPLETED',
-					data 		= {'floor': self.local_elev.floor}
+					data 		= {
+						'floor': 		self.local_elev.floor,
+						'dir': 			self.local_elev.dir
+					}
 				)
+				self.local_elev.stop()
 			self.local_elev.target = -1
+
+	def _on_local_elev_started_moving(self, data):
+		if (self.socket.is_master):
+			pass
+		else:
+			self.socket.tcp_send(
+				address 	= self.socket.server_ip,
+				title 		= 'FOREIGN ELEV STARTED MOVING',
+				data 		= data
+			)
+
+	def _on_foreign_elev_started_moving(self, data):
+		try:
+			elevator.Elevator.nodes[data['address']].dir = data['dir']
+		except KeyError as e:
+			print(e)
+			print('ignoring...')
 
 	def __init__(self):
 		self.local_elev 	= None
 		self.socket 		= None
 		self.order_matrix 	= None
+		self.scheduler 		= None
 		self.actions 		= {
 			'CHAT': 						self._on_chat,
 			'PING': 						self._on_ping,
@@ -185,4 +229,6 @@ class EventHandler:
 			'MASTER DISCONNECTED': 			self._on_master_disconnected,
 			'ELEV POSITION UPDATE': 		self._on_elev_position_update,
 			'LOCAL ELEV REACHED FLOOR': 	self._on_local_elev_reached_floor,
+			'LOCAL ELEV STARTED MOVING': 	self._on_local_elev_started_moving,
+			'FOREIGN ELEV STARTED MOVING': 	self._on_foreign_elev_started_moving,
 		}

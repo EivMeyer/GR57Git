@@ -58,7 +58,7 @@ class Socket:
 				messages = str(buf.decode('UTF-8')).split('//')
 				for message in messages:
 					if (len(message) > 0):
-						print('\nMSG: ' + str(address) + ' >> ' + message + '\n')
+						#print('\nMSG: ' + str(address) + ' >> ' + message + '\n')
 						msg = json.loads(message)
 						msg['data']['address'] = address
 						self.event_handler.actions[msg['title']](msg['data'])
@@ -109,7 +109,7 @@ class Socket:
 			'data': 	data
 		}
 		msg = json.dumps(msg) + '//'
-		print('// sending', msg)
+		#print('// sending', msg)
 		connection.send(msg.encode('UTF-8'))
 
 	def tcp_connection_listener(self, tcp_socket):

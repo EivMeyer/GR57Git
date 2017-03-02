@@ -3,6 +3,7 @@ import orders
 import sys
 import event
 import elevator
+import scheduling
 
 # ---------------------------------
 #    I N I T I A L I Z A T I O N  
@@ -14,7 +15,6 @@ socket 			= network.Socket()
 local_elev 		= elevator.LocalElevator()
 order_matrix 	= orders.OrderMatrix()
 
-## This should be designed better...
 # Setting module linkages
 local_elev.event_handler 	= event_handler
 event_handler.local_elev 	= local_elev
@@ -25,7 +25,13 @@ socket.event_handler 		= event_handler
 # Initiating system
 socket.connect(int(sys.argv[1])) # port
 
-if (not socket.is_master):
+if (socket.is_master):
+	scheduler = scheduling.Scheduler()
+	scheduler.order_matrix 	= order_matrix
+	scheduler.event_handler = event_handler
+	event_handler.scheduler = scheduler
+	
+else:
 	elevator.Elevator.nodes[socket.local_ip] = local_elev
 	local_elev.start()
 

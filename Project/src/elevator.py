@@ -7,10 +7,11 @@ import network
 
 class Elevator:
 	def __init__(self):
-		self.event_handler = None
-		self.floor 	= -1
-		self.target = -1
-		self.dir 	= 0
+		self.event_handler 	= None
+		self.last_floor 	= -1
+		self.floor 			= -1
+		self.target 		= -1
+		self.dir 			= 0
 		
 # Static array that contains all elevators 
 Elevator.nodes = {}
@@ -19,11 +20,15 @@ class LocalElevator(Elevator):
 	def poll(self):
 		while (True):
 			# Checking current floor signal
-			cur_floor = self.api.elev_get_floor_sensor_signal()
+			floor_signal = self.api.elev_get_floor_sensor_signal()
 
 			# Checking if elevator has reached a new floor
-			if (cur_floor != -1 and cur_floor != self.floor):
-				self.event_handler.actions['LOCAL ELEV REACHED FLOOR']({'floor': cur_floor})
+			if (floor_signal != -1 and floor_signal != self.floor):
+				self.floor = floor_signal
+				self.event_handler.actions['LOCAL ELEV REACHED FLOOR']({'floor': self.floor})
+
+			elif (floor_signal == -1 and self.floor == int(self.floor)):
+				self.floor += 0.5 * self.dir
 
 			# Checking buttons
 			for floor in range(config.N_FLOORS):
@@ -47,18 +52,25 @@ class LocalElevator(Elevator):
 						self.button_accessibility_states[floor][button] = True
 
 	def move_to(self, floor):
+		current_dir = self.dir
+
 		self.target = floor
 		if (floor > self.floor):
 			self.dir = 1
 		elif (floor == self.floor):
 			self.dir = 0
+			self.event_handler.actions['LOCAL ELEV REACHED FLOOR']({'floor': self.floor})
 		else:
 			self.dir = -1
 
 		print('Moving to', floor, 'direction', self.dir, 'current floor', self.floor)
-		self.api.elev_set_motor_direction(c_int(self.dir))
+		if (current_dir != self.dir):
+			self.api.elev_set_motor_direction(c_int(self.dir))
+
+		self.event_handler.actions['LOCAL ELEV STARTED MOVING']({'dir': self.dir})
 
 	def stop(self):
+		self.dir 	= 0
 		self.api.elev_set_motor_direction(c_int(0))
 
 	def start(self):
