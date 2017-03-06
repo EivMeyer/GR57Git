@@ -4,6 +4,7 @@ import sys
 import event
 import elevator
 import scheduling
+import random
 
 # ---------------------------------
 #    I N I T I A L I Z A T I O N  
@@ -12,7 +13,7 @@ import scheduling
 # Defining system variables
 event_handler 	= event.EventHandler()
 socket 			= network.Socket()
-local_elev 		= elevator.LocalElevator()
+local_elev 		= elevator.LocalElevator(0)
 order_matrix 	= orders.OrderMatrix()
 
 # Setting module linkages

@@ -58,15 +58,17 @@ class Socket:
 				messages = str(buf.decode('UTF-8')).split('//')
 				for message in messages:
 					if (len(message) > 0):
-						#print('\nMSG: ' + str(address) + ' >> ' + message + '\n')
+						#print('\nmsg: ' + str(address) + ' >> ' + message + '\n')
 						msg = json.loads(message)
 						msg['data']['address'] = address
 						self.event_handler.actions[msg['title']](msg['data'])
 					
 			except ValueError as e:
+				print('\n')
 				print(msg)
 				print("ERROR: ", e)
-				
+				print('Ignoring')
+				continue
 				print('Connection lost')
 				if (mode == 'server'):
 					self.event_handler.actions['SLAVE DISCONNECTED']({
@@ -110,7 +112,13 @@ class Socket:
 		}
 		msg = json.dumps(msg) + '//'
 		#print('// sending', msg)
-		connection.send(msg.encode('UTF-8'))
+
+		try:
+			connection.send(msg.encode('UTF-8'))
+
+		except Exception as e:
+			print(e)
+			print('IGNORING')
 
 	def tcp_connection_listener(self, tcp_socket):
 		while (True):
