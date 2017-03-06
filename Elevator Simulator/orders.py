@@ -1,4 +1,23 @@
 import config
+from random import randint
+from random import choice
+
+def get_random_order():
+	floor = randint(0, config.N_FLOORS-1)
+	is_internal = randint(0, 1)
+
+	if (is_internal == 1):
+		data = randint(0, config.N_ELEVS-1)
+	else:
+		if (floor == 0):
+			data = 1
+		elif (floor == config.N_FLOORS-1):
+			data = -1
+		else:
+			data = choice([-1, 1])
+
+	return (floor, is_internal, data)
+
 
 class OrderMatrix:
 	def __init__(self):
