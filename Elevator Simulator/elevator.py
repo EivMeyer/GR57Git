@@ -42,10 +42,6 @@ class Elevator:
 				self.door_open = True
 				self.time_out = time.time()
 
-
-
-			
-
 		elif (self.floor == int(self.floor)):
 			self.floor += 0.5*self.dir
 
