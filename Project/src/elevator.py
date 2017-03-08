@@ -116,6 +116,7 @@ class LocalElevator(Elevator):
 		if (floor_signal != -1):
 			self.floor = floor_signal
 			self.last_floor = self.floor
+			self.event_handler.actions['LOCAL ELEV REACHED FLOOR']({'floor': self.floor})
 
 		else:
 			# Initial descent to the bottom

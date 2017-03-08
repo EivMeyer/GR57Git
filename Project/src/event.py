@@ -260,6 +260,8 @@ class EventHandler:
 						'target_dir': 	target_dir
 					}
 				)
+			else:
+				elevator.Elevator.nodes[data['address']].dir = 0
 		else:
 			self.local_elev.door_open = False
 			self.local_elev.api.elev_set_door_open_lamp(0)
