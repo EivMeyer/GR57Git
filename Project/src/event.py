@@ -141,6 +141,7 @@ class EventHandler:
 				}
 			)
 
+
 	def _on_slave_disconnected(self, data):
 		print(str(data['address'][0]) + ' disconnected from the server')
 
@@ -180,7 +181,7 @@ class EventHandler:
 				if (self.socket.is_master):
 					pass
 				else:
-					print("Reached target")
+					print("Reached target (dir " + str(self.local_elev.dir) + ')')
 					
 					self.local_elev.stop()
 					self.local_elev.api.elev_set_door_open_lamp(1)
@@ -196,14 +197,19 @@ class EventHandler:
 						}
 					)
 					
-					self.local_elev.target = -1
-					self.local_elev.dir = 0
-					self.local_elev.target_dir = 0
+					# self.local_elev.target = -1
+					# self.local_elev.dir = 0
+					# self.local_elev.target_dir = 0
 
 	def _on_command_completed(self, data):
-		print('\nCommand completed (target ' + str(data['target']) + ' target_dir: ' + str(data['target_dir']) + ')')
-		self.order_matrix.internal[data['address']][data['target']] = 0
-		self.order_matrix.external[data['target']][data['target_dir']] = 0
+		print('\nCommand completed (target ' + str(data['target']) + ' target_dir: ' + str(data['target_dir']) + ' dir: ' + str(elevator.Elevator.nodes[data['address']].dir) + ')')
+		print('Address: ', data['address'])
+		if (data['target_dir'] == 0):
+			self.order_matrix.internal[data['address']][data['target']] = 0
+			self.order_matrix.external[data['target']][elevator.Elevator.nodes[data['address']].dir] = 0
+
+		else:
+			self.order_matrix.external[data['target']][data['target_dir']] = 0
 
 		if (self.socket.is_master):
 			self.socket.tcp_broadcast(
@@ -215,17 +221,34 @@ class EventHandler:
 			elevator.Elevator.nodes[data['address']].target = -1
 			elevator.Elevator.nodes[data['address']].target_dir = 0
 			
-		else:
-			button = 0
 			if (data['target_dir'] == 1):
 				button = 0
 			elif (data['target_dir'] == -1):
 				button = 1
-			elif (data['target_dir'] == 0):
-				button = 2
+			else:
+				if (elevator.Elevator.nodes[data['address']].dir == 1):
+					button = 0
+				else:
+					button = 1
 
-			self.local_elev.api.elev_set_button_lamp(button, data['target'], 0)
-			self.local_elev.api.elev_set_button_lamp(2, data['target'], 0)
+			self.socket.tcp_broadcast(
+				title 		= 'SET LAMP SIGNAL',
+				data 		= {
+					'floor': 	data['target'],
+					'button': 	button,
+					'state': 	0
+				}
+			)
+
+			self.socket.tcp_send(
+				address 	= data['address'],
+				title 		= 'SET LAMP SIGNAL',
+				data 		= {
+					'floor': 	data['target'],
+					'button': 	2,
+					'state': 	0
+				}
+			)
 
 	def _on_local_elev_started_moving(self, data):
 		if (self.socket.is_master):
@@ -271,12 +294,8 @@ class EventHandler:
 				data 		= {}
 			)
 
-		
-		
-		
-
-
-		
+	def _on_set_lamp_signal(self, data):
+		self.local_elev.api.elev_set_button_lamp(data['button'], data['floor'], data['state'])		
 
 	def __init__(self):
 		self.local_elev 	= None
@@ -302,4 +321,5 @@ class EventHandler:
 			'LOCAL ELEV STARTED MOVING': 	self._on_local_elev_started_moving,
 			'FOREIGN ELEV STARTED MOVING': 	self._on_foreign_elev_started_moving,
 			'DOOR CLOSED': 					self._on_door_closed,
+			'SET LAMP SIGNAL': 				self._on_set_lamp_signal,
 		}

@@ -71,6 +71,10 @@ class Scheduler:
 		if (elev.target_dir != 0):
 			self.order_matrix.external[elev.target][elev.target_dir] = 1
 
+		elif (elev.target != -1):
+			if (self.order_matrix.external[elev.target][elev.dir] == 0.5):
+				self.order_matrix.external[elev.target][elev.dir] = 1
+
 		cost, target, target_dir = self.get_best_command_for_elev(elev)
 		if ((target != elev.target or target_dir != elev.target_dir) and elev.target != -1 and target != -1):
 			#print(elev.address, '->', target, elev.target, target_dir, elev.target_dir)
@@ -81,11 +85,15 @@ class Scheduler:
 
 		#print('elevator', elev.address, 'is on ', elev.floor, ' new command', target, target_dir)
 		if (target != -1):
-
 			elev.target = target
 			elev.target_dir = target_dir
 			if (elev.target_dir != 0):
 				self.order_matrix.external[elev.target][elev.target_dir] = 0.5
+			elif (target != elev.floor):
+				path_dir = 1 if elev.floor < elev.target else -1
+				if (self.order_matrix.external[elev.target][path_dir] == 1):
+					self.order_matrix.external[elev.target][path_dir] = 0.5
+
 			return (target, target_dir)
 
 		else:

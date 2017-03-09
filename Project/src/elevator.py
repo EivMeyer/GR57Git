@@ -90,9 +90,6 @@ class LocalElevator(Elevator):
 		self.dir 	= 0
 		self.api.elev_set_motor_direction(c_int(0))
 
-
-
-
 		# for (int f = 0; f < N_FLOORS; f++) {
 	 #        for (elev_button_type_t b = 0; b < N_BUTTONS; b++){
 	 #            elev_set_button_lamp(b, f, 0);
