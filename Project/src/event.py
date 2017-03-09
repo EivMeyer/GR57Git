@@ -204,14 +204,17 @@ class EventHandler:
 	def _on_command_completed(self, data):
 		print('\nCommand completed (target ' + str(data['target']) + ' target_dir: ' + str(data['target_dir']))
 		print('Address: ', data['address'])
-		if (data['target_dir'] == 0):
-			self.order_matrix.internal[data['address']][data['target']] = 0
-			self.order_matrix.external[data['target']][elevator.Elevator.nodes[data['address']].dir] = 0
-
-		else:
-			self.order_matrix.external[data['target']][data['target_dir']] = 0
+		
 
 		if (self.socket.is_master):
+
+			if (data['target_dir'] == 0):
+				self.order_matrix.internal[data['address']][data['target']] = 0
+				self.order_matrix.external[data['target']][elevator.Elevator.nodes[data['address']].dir] = 0
+
+			else:
+				self.order_matrix.external[data['target']][data['target_dir']] = 0
+			
 			self.socket.tcp_broadcast(
 				title 		= 'COMMAND COMPLETED',
 				data 		= data
@@ -295,7 +298,12 @@ class EventHandler:
 			)
 
 	def _on_set_lamp_signal(self, data):
-		self.local_elev.api.elev_set_button_lamp(data['button'], data['floor'], data['state'])		
+		self.local_elev.api.elev_set_button_lamp(data['button'], data['floor'], data['state'])
+
+	def _on_set_order_state(self, data):
+		pass
+		#if (data['is_internal']):
+			#self.order_matrix.internal[data['ip']][data['target']] = 0
 
 	def __init__(self):
 		self.local_elev 	= None
