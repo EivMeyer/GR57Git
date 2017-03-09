@@ -6,6 +6,8 @@ import event
 import config
 import network
 
+
+
 class Elevator:
 	def __init__(self, address):
 		self.event_handler 	= None
@@ -17,6 +19,7 @@ class Elevator:
 		self.dir 			= 0
 		self.door_open 		= False
 		self.time_out 		= time.time()
+		self.last_heartbeat = time.time()
 		
 # Static array that contains all elevators 
 Elevator.nodes = {}
@@ -46,7 +49,9 @@ class LocalElevator(Elevator):
 						self.button_accessibility_states[floor][button] = True
 
 			if (time.time() - self.time_out > 2 and self.door_open):
-				self.event_handler.actions['DOOR CLOSED']({})
+				self.event_handler.actions['DOOR CLOSED']({
+					'address': 	self.address
+				})
 
 			if (self.door_open):
 				continue
@@ -60,7 +65,10 @@ class LocalElevator(Elevator):
 					if (self.dir == (1 if (floor_signal > self.last_floor) else -1)):
 						self.floor 		= floor_signal
 						self.last_floor = self.floor
-						self.event_handler.actions['LOCAL ELEV REACHED FLOOR']({'floor': self.floor})
+						self.event_handler.actions['LOCAL ELEV REACHED FLOOR']({
+							'address': self.address,
+							'floor': self.floor
+						})
 			else:
 				if (self.floor == int(self.floor)):
 					self.floor += 0.5 * self.dir
@@ -69,25 +77,29 @@ class LocalElevator(Elevator):
 	def move_to(self, target, target_dir):
 		current_dir = self.dir
 
+		print('Elev moving to' + str(target))
+
 		self.target = target
 		self.target_dir = target_dir
 		if (self.target > self.floor):
 			self.dir = 1
 		elif (self.target == self.floor):
 			self.dir = 0
-			self.event_handler.actions['LOCAL ELEV REACHED FLOOR']({'floor': self.target})
+			self.event_handler.actions['LOCAL ELEV REACHED FLOOR']({
+				'floor': self.target,
+				'address': self.address
+			})
 			return
 		else:
 			self.dir = -1
 
 		#print('Moving to', self.target, 'direction', self.dir, 'current floor', self.floor, 'current_dir:', current_dir)
-		if (current_dir != self.dir):
-			self.api.elev_set_motor_direction(c_int(self.dir))
+		#if (current_dir != self.dir):
+		self.api.elev_set_motor_direction(c_int(self.dir))
 
 		
 
 	def stop(self):
-		self.dir 	= 0
 		self.api.elev_set_motor_direction(c_int(0))
 
 		# for (int f = 0; f < N_FLOORS; f++) {
@@ -113,7 +125,10 @@ class LocalElevator(Elevator):
 		if (floor_signal != -1):
 			self.floor = floor_signal
 			self.last_floor = self.floor
-			self.event_handler.actions['LOCAL ELEV REACHED FLOOR']({'floor': self.floor})
+			self.event_handler.actions['LOCAL ELEV REACHED FLOOR']({
+				'address': self.address,
+				'floor': self.floor
+			})
 
 		else:
 			# Initial descent to the bottom
@@ -128,6 +143,15 @@ class LocalElevator(Elevator):
 			self.button_accessibility_states.append([])
 			for button in range(config.N_BUTTONS):
 				self.button_accessibility_states[floor].append(True)
+
+def elev_watchdog():
+	while (True):
+		time.sleep(1)
+		for address in Elevator.nodes:
+			elev = Elevator.nodes[address]
+			if (time.time() - elev.last_heartbeat > 3):
+				pass
+				#print("Elev", address, "is dead")
 
 		
 #local_elev.api.elev_set_motor_direction(c_int(1))

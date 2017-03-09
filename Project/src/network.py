@@ -4,7 +4,6 @@ import time
 import threading
 import sys
 import config
-import time
 
 def get_local_ip():
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -15,12 +14,13 @@ def get_local_ip():
 
 class Socket:
 	def __init__(self):
-		self.port 			= None
-		self.event_handler 	= None
-		self.connections 	= {}
-		self.is_master 		= None
-		self.local_ip 		= None
-		self.server_ip 		= None
+		self.port 					= None
+		self.event_handler 			= None
+		self.connections 			= {}
+		self.is_master 				= None
+		self.local_ip 				= None
+		self.server_ip 				= None
+		self.server_last_heartbeat 	= None
 
 	def tcp_chat(self):
 		# Only for debug purposes
@@ -132,6 +132,20 @@ class Socket:
 				# This means that the socket is closed
 				continue
 
+	def tcp_ping_master(self):
+		while (True):
+			time.sleep(1)
+			self.tcp_send(
+				address 	= self.server_ip,
+				title 		= 'PING',
+				data 		= {}
+			)
+
+			if (time.time() - self.server_last_heartbeat > 3):
+				print('Server is dead')
+				self.connect(self.port)
+				return
+
 	def connect(self, port):
 		self.port = port
 		self.local_ip = get_local_ip()
@@ -198,15 +212,17 @@ class Socket:
 
 		threads = [
 			threading.Thread(target = self.tcp_receive, 				args = [server_ip, 'client']),
-			threading.Thread(target = self.tcp_chat, 					args = ())
+			threading.Thread(target = self.tcp_chat, 					args = ()),
+			threading.Thread(target = self.tcp_ping_master, 			args = ())
 		]
 
 		for thread in threads:
 			thread.daemon = True
 			thread.start()
 
-		self.is_master = False
-		self.server_ip = server_ip
+		self.is_master 				= False
+		self.server_ip 				= server_ip
+		self.server_last_heartbeat 	= time.time()
 
 		# Setting terminal title 
 		sys.stdout.write('\x1b];' + 'CLIENT' + '\x07')

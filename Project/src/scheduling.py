@@ -71,7 +71,7 @@ class Scheduler:
 		if (elev.target_dir != 0):
 			self.order_matrix.external[elev.target][elev.target_dir] = 1
 
-		elif (elev.target != -1):
+		elif (elev.target != -1 and elev.dir != 0):
 			if (self.order_matrix.external[elev.target][elev.dir] == 0.5):
 				self.order_matrix.external[elev.target][elev.dir] = 1
 
