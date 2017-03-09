@@ -193,9 +193,6 @@ class Socket:
 			ip = config.SERVER_HIERARCHY[i]
 			self.udp_send('MASTER_CONNECTED', ip)
 
-
-		
-
 	def client(self, server_ip):
 		print('Connecting to ' + server_ip + '...')
 

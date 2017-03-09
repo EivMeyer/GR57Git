@@ -15,7 +15,7 @@ class Scheduler:
 		for address in elevators:
 			elev = elevators[address]
 
-			if (elev.door_open):
+			if (elev.door_open or elev.is_dead):
 				continue
 
 			elev_min_cost, elev_min_target, elev_min_target_dir = self.get_best_command_for_elev(elev)
@@ -104,7 +104,7 @@ class Scheduler:
 
 		cost = math.sqrt(2*(elev.floor-floor_order)**2 + (0 if (elev.floor == int(elev.floor) and is_internal) else 1000000000*(elev.dir-path_dir)**2) + (0 if is_internal else 1*(elev.dir-dir_order)**2) + (1000*(1-is_internal)**2 if elev.dir != dir_order else 0))
 
-		print('elev', elev.address, ':', 'floor_order:', floor_order, 'elev.floor:', elev.floor, 'elev.dir:', elev.dir, 'path_dir:', path_dir, 'dir_order:', dir_order, 'internal:', is_internal, 'cost: ', cost)
+		#print('elev', elev.address, ':', 'floor_order:', floor_order, 'elev.floor:', elev.floor, 'elev.dir:', elev.dir, 'path_dir:', path_dir, 'dir_order:', dir_order, 'internal:', is_internal, 'cost: ', cost)
 		return cost
 
 

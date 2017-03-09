@@ -17,7 +17,7 @@ class EventHandler:
 
 	def _on_ping(self, data):
 		if (self.socket.is_master):
-			#print(data['address'], 'is alive')
+			print(data['address'], 'is alive')
 			elevator.Elevator.nodes[data['address']].last_heartbeat = time.time()
 			self.socket.tcp_send(
 				address  	= data['address'],
@@ -75,10 +75,11 @@ class EventHandler:
 				target, target_dir = self.scheduler.plan_next(elev_dict['elev'])
 
 				if (elev_dict['elev'].address == self.local_elev.address):
-					self.actions['NEW COMMAND']({
-						'target': 	  target,
-						'target_dir': target_dir
-					})
+					if (target != -1):
+						self.actions['NEW COMMAND']({
+							'target': 	  target,
+							'target_dir': target_dir
+						})
 
 				else:
 					if (target != -1):
@@ -164,16 +165,16 @@ class EventHandler:
 	def _on_slave_disconnected(self, data):
 		print(str(data['address'][0]) + ' disconnected from the server')
 
+		elevator.Elevator.nodes[data['address']].is_dead = True
+
 		# Deallocating storage for internal orders
 		self.order_matrix.remove_elevator(data['address']) 
 
 	def _on_master_connected(self, data):
-		self.socket.connect()
-		pass
+		self.socket.connect(self.socket.port)
 
 	def _on_master_disconnected(self, data):
-		self.socket.connect()
-		pass
+		self.socket.connect(self.socket.port)
 
 	def _on_elev_position_update(self, data):
 		#print(data['address'][0], 'is now at floor ' + str(data['floor']))
@@ -263,12 +264,6 @@ class EventHandler:
 			if (data['address'] == self.local_elev.address):
 				self.actions['SET LAMP SIGNAL']({
 					'floor': 		data['target'],
-					'button': 		button,
-					'state': 		0
-				})
-
-				self.actions['SET LAMP SIGNAL']({
-					'floor': 		data['target'],
 					'button': 		2,
 					'state': 		0
 				})
@@ -284,6 +279,12 @@ class EventHandler:
 					}
 				)
 
+			self.actions['SET LAMP SIGNAL']({
+				'floor': 		data['target'],
+				'button': 		button,
+				'state': 		0
+			})
+
 			self.socket.tcp_broadcast(
 				title 		= 'SET LAMP SIGNAL',
 				data 		= {
@@ -295,7 +296,7 @@ class EventHandler:
 
 	def _on_local_elev_started_moving(self, data):
 		if (self.socket.is_master):
-			print('Set dir to', data['dir'])
+			#print('Set dir to', data['dir'])
 			elevator.Elevator.nodes[self.local_elev.address].dir = data['dir']
 		else:
 			self.socket.tcp_send(

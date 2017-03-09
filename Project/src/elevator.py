@@ -10,6 +10,7 @@ import network
 
 class Elevator:
 	def __init__(self, address):
+		self.is_dead 		= False
 		self.event_handler 	= None
 		self.floor 			= 3000
 		self.last_floor 	= self.floor
@@ -77,7 +78,7 @@ class LocalElevator(Elevator):
 	def move_to(self, target, target_dir):
 		current_dir = self.dir
 
-		print('Elev moving to' + str(target))
+		#print('Elev moving to ' + str(target))
 
 		self.target = target
 		self.target_dir = target_dir
@@ -144,14 +145,14 @@ class LocalElevator(Elevator):
 			for button in range(config.N_BUTTONS):
 				self.button_accessibility_states[floor].append(True)
 
-def elev_watchdog():
+def elev_watchdog(socket, event_handler):
 	while (True):
 		time.sleep(1)
 		for address in Elevator.nodes:
 			elev = Elevator.nodes[address]
-			if (time.time() - elev.last_heartbeat > 3):
-				pass
-				#print("Elev", address, "is dead")
+			if (elev.address != socket.local_ip and not elev.is_dead):
+				if (time.time() - elev.last_heartbeat > 3):
+					event_handler.actions['SLAVE DISCONNECTED']({'address': elev.address})
 
 		
 #local_elev.api.elev_set_motor_direction(c_int(1))

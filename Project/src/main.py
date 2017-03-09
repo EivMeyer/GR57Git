@@ -36,7 +36,7 @@ scheduler.event_handler 	= event_handler
 event_handler.scheduler 	= scheduler
 
 # Creating elevator watchdog thread
-elev_watchdog = threading.Thread(target = elevator.elev_watchdog)
+elev_watchdog = threading.Thread(target = elevator.elev_watchdog, args = [socket, event_handler])
 elev_watchdog.daemon = True
 elev_watchdog.start()
 	
