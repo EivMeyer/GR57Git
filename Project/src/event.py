@@ -202,7 +202,7 @@ class EventHandler:
 					# self.local_elev.target_dir = 0
 
 	def _on_command_completed(self, data):
-		print('\nCommand completed (target ' + str(data['target']) + ' target_dir: ' + str(data['target_dir']) + ' dir: ' + str(elevator.Elevator.nodes[data['address']].dir) + ')')
+		print('\nCommand completed (target ' + str(data['target']) + ' target_dir: ' + str(data['target_dir']))
 		print('Address: ', data['address'])
 		if (data['target_dir'] == 0):
 			self.order_matrix.internal[data['address']][data['target']] = 0
