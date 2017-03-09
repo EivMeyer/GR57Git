@@ -17,7 +17,7 @@ class EventHandler:
 
 	def _on_ping(self, data):
 		if (self.socket.is_master):
-			print(data['address'], 'is alive')
+			#print(data['address'], 'is alive')
 			elevator.Elevator.nodes[data['address']].last_heartbeat = time.time()
 			self.socket.tcp_send(
 				address  	= data['address'],
@@ -76,7 +76,7 @@ class EventHandler:
 			for elev_dict in sorted_elevs:
 				target, target_dir = self.scheduler.plan_next(elev_dict['elev'])
 
-				if (data['address'] == self.local_elev.address):
+				if (elev_dict['elev'].address == self.local_elev.address):
 					self.actions['NEW COMMAND']({
 						'target': 	  target,
 						'target_dir': target_dir

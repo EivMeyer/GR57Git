@@ -16,6 +16,11 @@ event_handler 	= event.EventHandler()
 socket 			= network.Socket()
 order_matrix 	= orders.OrderMatrix()
 
+# Setting module linkages
+event_handler.socket 		= socket
+event_handler.order_matrix 	= order_matrix
+socket.event_handler 		= event_handler
+
 # Initiating system
 socket.connect(int(sys.argv[1])) # port
 local_elev 	= elevator.LocalElevator(socket.local_ip)
@@ -26,9 +31,6 @@ order_matrix.add_elevator(local_elev.address)
 # Setting module linkages
 local_elev.event_handler 	= event_handler
 event_handler.local_elev 	= local_elev
-event_handler.socket 		= socket
-event_handler.order_matrix 	= order_matrix
-socket.event_handler 		= event_handler
 scheduler.order_matrix 		= order_matrix
 scheduler.event_handler 	= event_handler
 event_handler.scheduler 	= scheduler
