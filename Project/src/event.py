@@ -64,8 +64,6 @@ class EventHandler:
 		})
 
 		if (self.socket.is_master):
-
-			
 			self.socket.tcp_broadcast(
 				title 		= 'NEW FOREIGN EXTERNAL ORDER',
 				data 		= data
@@ -276,15 +274,6 @@ class EventHandler:
 				})
 
 			else:
-				self.socket.tcp_broadcast(
-					title 		= 'SET LAMP SIGNAL',
-					data 		= {
-						'floor': 	data['target'],
-						'button': 	button,
-						'state': 	0
-					}
-				)
-
 				self.socket.tcp_send(
 					address 	= data['address'],
 					title 		= 'SET LAMP SIGNAL',
@@ -294,6 +283,15 @@ class EventHandler:
 						'state': 	0
 					}
 				)
+
+			self.socket.tcp_broadcast(
+				title 		= 'SET LAMP SIGNAL',
+				data 		= {
+					'floor': 	data['target'],
+					'button': 	button,
+					'state': 	0
+				}
+			)
 
 	def _on_local_elev_started_moving(self, data):
 		if (self.socket.is_master):
