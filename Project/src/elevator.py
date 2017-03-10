@@ -135,6 +135,8 @@ class LocalElevator(Elevator):
 			# Initial descent to the bottom
 			self.move_to(0, 0)
 
+		print('Started local elevator')
+
 	def __init__(self, address):
 		Elevator.__init__(self, address)
 		self.api = cdll.LoadLibrary("../driver/elev_api.so")
