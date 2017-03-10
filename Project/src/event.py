@@ -15,9 +15,15 @@ class EventHandler:
 	def _on_chat(self, data): # DEBUG METHOD
 		print(data['address'], 'said', data['message'])
 
+		if (data['message'] == 'orders'):
+			print('External')
+			pprint(self.order_matrix.external)
+			print('\nInternal')
+			pprint(self.order_matrix.internal)
+
 	def _on_ping(self, data):
 		if (self.socket.is_master):
-			print(data['address'], 'is alive')
+			#print(data['address'], 'is alive')
 			elevator.Elevator.nodes[data['address']].last_heartbeat = time.time()
 			self.socket.tcp_send(
 				address  	= data['address'],
@@ -45,9 +51,11 @@ class EventHandler:
 	def _on_new_local_internal_order(self, data):
 		print('New local internal order (floor: ' + str(data['floor']) + ')')
 		if (self.socket.is_master):
+			print('Is master')
 			data['address'] = self.local_elev.address
 			self.actions['NEW FOREIGN INTERNAL ORDER'](data)
 		else:
+			print('Isn"t master')
 			self.socket.tcp_send(
 				address  	= self.socket.server_ip,
 				title 		= 'NEW FOREIGN INTERNAL ORDER',
@@ -55,7 +63,12 @@ class EventHandler:
 			)
 
 	def _on_new_foreign_external_order(self, data):
+		# Ignoring order if it already exists
+		if (self.order_matrix.external[data['floor']][data['direction']] > 0):
+			return
+
 		print('\nNew foreign external order: (floor: ' + str(data['floor']) + ', direction: ' + str(data['direction']) + ')')
+
 		self.order_matrix.external[data['floor']][data['direction']] = 1
 		self.actions['SET LAMP SIGNAL']({
 			'floor': 		data['floor'],
@@ -93,43 +106,46 @@ class EventHandler:
 						)					
 
 	def _on_new_foreign_internal_order(self, data):
-		with lock:
-			print('New foreign internal order (floor: ' + str(data['floor']) + ')')
-			self.order_matrix.internal[data['address']][data['floor']] = 1
+		# Ignoring order if it already exists
+		if (self.order_matrix.internal[data['address']][data['floor']] > 0):
+			return
 
-			if (self.socket.local_ip == data['address']):
-				self.actions['SET LAMP SIGNAL']({
-					'floor': 		data['floor'],
-					'button': 		2,
-					'state': 		1
-				})
+		print('New foreign internal order (floor: ' + str(data['floor']) + ')')
+		self.order_matrix.internal[data['address']][data['floor']] = 1
 
-			if (self.socket.is_master):
-				self.socket.tcp_broadcast(
-					title 		= 'NEW FOREIGN INTERNAL ORDER',
-					data 		= data
-				)
+		if (self.socket.local_ip == data['address']):
+			self.actions['SET LAMP SIGNAL']({
+				'floor': 		data['floor'],
+				'button': 		2,
+				'state': 		1
+			})
 
-				if (not elevator.Elevator.nodes[data['address']].door_open):
+		if (self.socket.is_master):
+			self.socket.tcp_broadcast(
+				title 		= 'NEW FOREIGN INTERNAL ORDER',
+				data 		= data
+			)
 
-					target, target_dir = self.scheduler.plan_next(elevator.Elevator.nodes[data['address']])
+			if (not elevator.Elevator.nodes[data['address']].door_open):
 
-					if (data['address'] == self.local_elev.address):
-						self.actions['NEW COMMAND']({
-									'target': 	  target,
-									'target_dir': target_dir
-						})
+				target, target_dir = self.scheduler.plan_next(elevator.Elevator.nodes[data['address']])
 
-					else:
-						if (target != -1):
-							self.socket.tcp_send(
-								address 	= data['address'],
-								title 		= 'NEW COMMAND',
-								data 		= {
-									'target': 	  target,
-									'target_dir': target_dir
-								}
-							)
+				if (data['address'] == self.local_elev.address):
+					self.actions['NEW COMMAND']({
+								'target': 	  target,
+								'target_dir': target_dir
+					})
+
+				else:
+					if (target != -1):
+						self.socket.tcp_send(
+							address 	= data['address'],
+							title 		= 'NEW COMMAND',
+							data 		= {
+								'target': 	  target,
+								'target_dir': target_dir
+							}
+						)
 		
 	def _on_new_command(self, data):
 		print('Received command ' + str(data['target']) + '(' + str(data['target_dir']) + ')')
@@ -237,7 +253,10 @@ class EventHandler:
 		if (self.socket.is_master):
 			if (data['target_dir'] == 0):
 				self.order_matrix.internal[data['address']][data['target']] = 0
-				self.order_matrix.external[data['target']][elevator.Elevator.nodes[data['address']].dir] = 0
+				if (self.order_matrix.external[data['target']][1] == 0.5):
+					self.order_matrix.external[data['target']][1] = 1
+				if (self.order_matrix.external[data['target']][-1] == 0.5):
+					self.order_matrix.external[data['target']][-1] = 1
 
 			else:
 				self.order_matrix.external[data['target']][data['target_dir']] = 0
