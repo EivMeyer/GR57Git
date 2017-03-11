@@ -3,6 +3,7 @@ N_BUTTONS 	= 3
 
 SERVER_HIERARCHY = [
 	#'10.22.64.233', # Eivind Laptop
+	'129.241.187.46',  # Labplass 24
 	'129.241.187.157', # Labplass 19
 	'129.241.187.153', # Labplass 21
 	'129.241.187.152', # Labplass 13

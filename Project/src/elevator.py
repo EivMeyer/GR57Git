@@ -37,14 +37,19 @@ class LocalElevator(Elevator):
 
 			# Based on empirical observations, bit 791 will change rapidly when the elevator has lost its power
 			# Otherwise it will always stay at 1
+
+			db = []
+			for k in range(1000):
+				if (self.api.io_read_bit(k) > 0):
+					db.append(k)
 			
-			if (self.api.io_read_bit(791) == 0):
+			if (len(db) >  10):
 				self.last_error = time.time()
 				if (not self.is_dead):
 					self.last_death = time.time()
 					self.event_handler.actions['LOCAL ELEV DEATH']({})
 
-			if (time.time() - self.last_error > 2 and self.is_dead):
+			if (time.time() - self.last_error > 5 and self.is_dead):
 				self.event_handler.actions['LOCAL ELEV RESURRECTION']({})
 
 			if (self.is_dead):
