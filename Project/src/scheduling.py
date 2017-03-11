@@ -66,6 +66,7 @@ class Scheduler:
 
 	def plan_next(self, elev):
 		#print('Current external order matrix:')
+		print('Planning next')
 		pprint(self.order_matrix.external)
 
 		if (elev.target_dir != 0):

@@ -16,9 +16,12 @@ class EventHandler:
 		print(data['address'], 'said', data['message'])
 
 		if (data['message'] == 'orders'):
-			print('External')
+			print('\n------------------------------')
+			print('O R D E R S')
+			print('-----------o-------------------')
+			print('External:')
 			pprint(self.order_matrix.external)
-			print('\nInternal')
+			print('\nInternal:')
 			pprint(self.order_matrix.internal)
 
 	def _on_ping(self, data):
@@ -37,7 +40,11 @@ class EventHandler:
 		pass
 
 	def _on_new_local_external_order(self, data):
-		print('New local external order (floor: ' + str(data['floor']) + ', direction: ' + str(data['direction']) + ')')
+		time.sleep(0.5)
+		if (self.local_elev.is_dead):
+			return
+		print('>> New local external order (floor: ' + str(data['floor']) + ', direction: ' + str(data['direction']) + ')')
+
 		if (self.socket.is_master):
 			data['address'] = self.local_elev.address
 			self.actions['NEW FOREIGN EXTERNAL ORDER'](data)
@@ -49,13 +56,14 @@ class EventHandler:
 			)
 
 	def _on_new_local_internal_order(self, data):
-		print('New local internal order (floor: ' + str(data['floor']) + ')')
+		time.sleep(0.5)
+		if (self.local_elev.is_dead):
+			return
+		print('>> New local internal order (floor: ' + str(data['floor']) + ')')
 		if (self.socket.is_master):
-			print('Is master')
 			data['address'] = self.local_elev.address
 			self.actions['NEW FOREIGN INTERNAL ORDER'](data)
 		else:
-			print('Isn"t master')
 			self.socket.tcp_send(
 				address  	= self.socket.server_ip,
 				title 		= 'NEW FOREIGN INTERNAL ORDER',
@@ -181,7 +189,7 @@ class EventHandler:
 	def _on_slave_disconnected(self, data):
 		print(str(data['address'][0]) + ' disconnected from the server')
 
-		elevator.Elevator.nodes[data['address']].is_dead = True
+		elevator.Elevator.nodes[data['address']].is_is_dead = True
 
 		# Deallocating storage for internal orders
 		self.order_matrix.remove_elevator(data['address']) 
@@ -204,7 +212,7 @@ class EventHandler:
 	def _on_local_elev_reached_floor(self, data):
 		print(data['address'])
 		debug = str(elevator.Elevator.nodes[data['address']].dir)
-		print('\nLocal elevator reached floor ' + str(data['floor']) + ' with dir ' + debug)
+		print('\n>> Local elevator reached floor ' + str(data['floor']) + ' with dir ' + debug)
 		self.local_elev.api.elev_set_floor_indicator(data['floor'])
 		if (self.socket.is_master):
 			self.actions['ELEV POSITION UPDATE']({
@@ -219,11 +227,8 @@ class EventHandler:
 			)
 
 		if (self.local_elev.floor == self.local_elev.target):
-			print("Reached target (elev_dir " + str(self.local_elev.dir) + ')')
+			print(">> Reached target (elev_dir " + str(self.local_elev.dir) + ')')
 			self.local_elev.stop()
-			self.local_elev.api.elev_set_door_open_lamp(1)
-			self.local_elev.door_open = True
-			self.local_elev.time_out = time.time()
 
 			if (self.socket.is_master):
 				self.actions['COMMAND COMPLETED']({
@@ -247,8 +252,9 @@ class EventHandler:
 				# self.local_elev.target_dir = 0
 
 	def _on_command_completed(self, data):
-		print('\nCommand completed (target ' + str(data['target']) + ' target_dir: ' + str(data['target_dir']))
+		print('\nCommand completed (target ' + str(data['target']) + ' target_dir: ' + str(data['target_dir']) + ')')
 		print('Address: ', data['address'])
+		pprint(self.order_matrix.external)
 		
 		if (self.socket.is_master):
 			if (data['target_dir'] == 0):
@@ -269,6 +275,20 @@ class EventHandler:
 			elevator.Elevator.nodes[data['address']].door_open = True
 			elevator.Elevator.nodes[data['address']].target = -1
 			elevator.Elevator.nodes[data['address']].target_dir = 0
+
+			if (data['address'] == self.local_elev.address):
+				self.actions['SET DOOR']({
+					'state': 		1
+				})
+
+			else:
+				self.socket.tcp_send(
+					address 	= data['address'],
+					title 		= 'SET DOOR',
+					data 		= {
+						'state': 	1
+					}
+				)
 			
 			if (data['target_dir'] == 1):
 				button = 0
@@ -333,13 +353,15 @@ class EventHandler:
 			print('ignoring...')
 
 	def _on_door_closed(self, data):
+		print('<< Door closed2')
 		if (self.socket.is_master):
 			elevator.Elevator.nodes[data['address']].door_open = False
 			target, target_dir = self.scheduler.plan_next(elevator.Elevator.nodes[data['address']])
 
 			if (data['address'] == self.local_elev.address):
+				print('<< Door closed')
 				if (target != -1):
-					print('Commanding elev to ' + str(target) + ' (' + str(target_dir) + ')')
+					#print('Commanding elev to ' + str(target) + ' (' + str(target_dir) + ')')
 					self.actions['NEW COMMAND']({
 							'target': 		target,
 							'target_dir': 	target_dir
@@ -349,7 +371,7 @@ class EventHandler:
 
 			else:
 				if (target != -1):
-					print('Commanding elev to ' + str(target) + ' (' + str(target_dir) + ')')
+					#print('Commanding elev to ' + str(target) + ' (' + str(target_dir) + ')')
 					self.socket.tcp_send(
 						address 	= data['address'],
 						title 		= 'NEW COMMAND',
@@ -367,20 +389,76 @@ class EventHandler:
 				data 		= {}
 			)
 
-		if (data['address'] == self.local_elev.address):
-			self.local_elev.door_open = False
-			self.local_elev.api.elev_set_door_open_lamp(0)
-
 	def _on_set_lamp_signal(self, data):
 		#print('light', data)
 		# if (data['state'] == 1):
 		# 	raise Exception('qwdqd')
 		self.local_elev.api.elev_set_button_lamp(data['button'], data['floor'], data['state'])
 
+	def _on_set_door(self, data):
+		print('<< Setting door to ' + str(data['state']))
+		self.local_elev.api.elev_set_door_open_lamp(data['state'])
+		self.local_elev.door_open = True if data['state'] == 1 else False
+		self.local_elev.time_out = time.time()
+
 	def _on_set_order_state(self, data):
 		pass
 		#if (data['is_internal']):
 			#self.order_matrix.internal[data['ip']][data['target']] = 0
+
+	def _on_local_elev_death(self, data):
+		print('>> Elev death')
+		if (self.socket.is_master):
+			self.actions['ELEV DEATH']({'address': self.local_elev.address})
+		else:
+			self.socket.tcp_send(
+				address 	= self.socket.server_ip,
+				title 		= 'ELEV DEATH',
+				data 		= {}
+			)
+
+	def _on_elev_death(self, data):
+		elevator.Elevator.nodes[data['address']].is_dead = True
+
+		if (elevator.Elevator.nodes[data['address']].target != -1):
+			if (self.order_matrix.external[elevator.Elevator.nodes[data['address']].target][1] == 0.5):
+				self.order_matrix.external[elevator.Elevator.nodes[data['address']].target][1] = 1
+			if (self.order_matrix.external[elevator.Elevator.nodes[data['address']].target][-1] == 0.5):
+				self.order_matrix.external[elevator.Elevator.nodes[data['address']].target][-1] = 1
+
+	def _on_local_elev_resurrection(self, data):
+		#print('>> Elev resurrection')
+		if (self.socket.is_master):
+			self.actions['ELEV RESURRECTION']({'address': self.local_elev.address})
+		else:
+			self.socket.tcp_send(
+				address 	= self.socket.server_ip,
+				title 		= 'ELEV RESURRECTION',
+				data 		= {}
+			)
+
+	def _on_elev_resurrection(self, data):
+		print('Elev resurrection')
+		elevator.Elevator.nodes[data['address']].is_dead = False
+
+		target, target_dir = self.scheduler.plan_next(elevator.Elevator.nodes[data['address']])
+
+		if (data['address'] == self.local_elev.address):
+			self.actions['NEW COMMAND']({
+				'target': 	  target,
+				'target_dir': target_dir
+			})
+
+		else:
+			if (target != -1):
+				self.socket.tcp_send(
+					address 	= data['address'],
+					title 		= 'NEW COMMAND',
+					data 		= {
+						'target': 	  target,
+						'target_dir': target_dir
+					}
+				)
 
 	def __init__(self):
 		self.local_elev 	= None
@@ -407,4 +485,9 @@ class EventHandler:
 			'FOREIGN ELEV STARTED MOVING': 	self._on_foreign_elev_started_moving,
 			'DOOR CLOSED': 					self._on_door_closed,
 			'SET LAMP SIGNAL': 				self._on_set_lamp_signal,
+			'SET DOOR': 					self._on_set_door,
+			'LOCAL ELEV DEATH': 			self._on_local_elev_death,
+			'ELEV DEATH': 					self._on_elev_death,
+			'LOCAL ELEV RESURRECTION': 		self._on_local_elev_resurrection,
+			'ELEV RESURRECTION': 			self._on_elev_resurrection,
 		}
