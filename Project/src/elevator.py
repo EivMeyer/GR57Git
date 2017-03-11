@@ -35,7 +35,7 @@ class LocalElevator(Elevator):
 	def poll(self):
 		while (True):
 
-			# Based on empirical observations, bit 791 signal will change rapidly when the elevator has lost its power
+			# Based on empirical observations, bit 791 will change rapidly when the elevator has lost its power
 			# Otherwise it will always stay at 1
 			
 			if (self.api.io_read_bit(791) == 0):
@@ -51,7 +51,7 @@ class LocalElevator(Elevator):
 				self.stop()
 				continue
 
-			#Checking buttons,
+			# Checking buttons,
 			for floor in range(config.N_FLOORS):
 				for button in range(config.N_BUTTONS):
 					# Checking if button is pressed

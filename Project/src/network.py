@@ -154,19 +154,20 @@ class Socket:
 
 		for ip in config.SERVER_HIERARCHY:
 			time.sleep(0.1)
+			if (ip == self.local_ip):
+				self.server()
+				break
+
 			try:
 				self.client(ip)
-				print('Succesfully connected to ' + str(ip))
+				print('Successfully connected to ' + str(ip))
 				break
 			except Exception as e:
 				print(str(ip) + ' is not reachable')
 				print(e)
 				pass
 
-			if (ip == self.local_ip):
-				self.server()
-				break
-
+			
 	def server(self):
 		self.is_master = True
 
@@ -197,6 +198,7 @@ class Socket:
 
 	def client(self, server_ip):
 		print('Connecting to ' + server_ip + '...')
+		self.is_master 				= False
 
 		clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -219,7 +221,6 @@ class Socket:
 			thread.daemon = True
 			thread.start()
 
-		self.is_master 				= False
 		self.server_ip 				= server_ip
 		self.server_last_heartbeat 	= time.time()
 

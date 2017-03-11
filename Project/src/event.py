@@ -163,6 +163,8 @@ class EventHandler:
 	def _on_slave_connected(self, data):
 		print(str(data['address']) + ' connected to the server')
 
+		print(self.socket.is_master)
+
 		# Assigning storage for internal orders
 		self.order_matrix.add_elevator(data['address'])
 
@@ -493,6 +495,32 @@ class EventHandler:
 	def _on_elev_reached_defined_state(self, data):
 		print(data['address'], 'reached defined state')
 		elevator.Elevator.nodes[data['address']].defined_state = True
+
+		target, target_dir = self.scheduler.plan_next(elevator.Elevator.nodes[data['address']])
+
+		if (data['address'] == self.local_elev.address):
+			if (target != -1):
+				#print('Commanding elev to ' + str(target) + ' (' + str(target_dir) + ')')
+				self.actions['NEW COMMAND']({
+						'target': 		target,
+						'target_dir': 	target_dir
+				})
+			else:
+				elevator.Elevator.nodes[data['address']].dir = 0
+
+		else:
+			if (target != -1):
+				#print('Commanding elev to ' + str(target) + ' (' + str(target_dir) + ')')
+				self.socket.tcp_send(
+					address 	= data['address'],
+					title 		= 'NEW COMMAND',
+					data 		= {
+						'target': 		target,
+						'target_dir': 	target_dir
+					}
+				)
+			else:
+				elevator.Elevator.nodes[data['address']].dir = 0
 
 
 	def __init__(self):

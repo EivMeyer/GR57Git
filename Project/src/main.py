@@ -1,5 +1,6 @@
 import network
 import orders
+import os
 import sys
 import event
 import elevator
@@ -50,3 +51,4 @@ try:
 except KeyboardInterrupt:
 	local_elev.stop()
 	print("System has been terminated")
+	os._exit(1)
