@@ -40,35 +40,37 @@ class EventHandler:
 		pass
 
 	def _on_new_local_external_order(self, data):
-		time.sleep(0.5)
-		if (self.local_elev.is_dead):
-			return
-		print('>> New local external order (floor: ' + str(data['floor']) + ', direction: ' + str(data['direction']) + ')')
+		with lock:
+			time.sleep(0.5)
+			if (self.local_elev.is_dead):
+				return
+			print('>> New local external order (floor: ' + str(data['floor']) + ', direction: ' + str(data['direction']) + ')')
 
-		if (self.socket.is_master):
-			data['address'] = self.local_elev.address
-			self.actions['NEW FOREIGN EXTERNAL ORDER'](data)
-		else:
-			self.socket.tcp_send(
-				address  	= self.socket.server_ip,
-				title 		= 'NEW FOREIGN EXTERNAL ORDER',
-				data 		= data,
-			)
+			if (self.socket.is_master):
+				data['address'] = self.local_elev.address
+				self.actions['NEW FOREIGN EXTERNAL ORDER'](data)
+			else:
+				self.socket.tcp_send(
+					address  	= self.socket.server_ip,
+					title 		= 'NEW FOREIGN EXTERNAL ORDER',
+					data 		= data,
+				)
 
 	def _on_new_local_internal_order(self, data):
-		time.sleep(0.5)
-		if (self.local_elev.is_dead):
-			return
-		print('>> New local internal order (floor: ' + str(data['floor']) + ')')
-		if (self.socket.is_master):
-			data['address'] = self.local_elev.address
-			self.actions['NEW FOREIGN INTERNAL ORDER'](data)
-		else:
-			self.socket.tcp_send(
-				address  	= self.socket.server_ip,
-				title 		= 'NEW FOREIGN INTERNAL ORDER',
-				data 		= data,
-			)
+		with lock:
+			time.sleep(0.5)
+			if (self.local_elev.is_dead):
+				return
+			print('>> New local internal order (floor: ' + str(data['floor']) + ')')
+			if (self.socket.is_master):
+				data['address'] = self.local_elev.address
+				self.actions['NEW FOREIGN INTERNAL ORDER'](data)
+			else:
+				self.socket.tcp_send(
+					address  	= self.socket.server_ip,
+					title 		= 'NEW FOREIGN INTERNAL ORDER',
+					data 		= data,
+				)
 
 	def _on_new_foreign_external_order(self, data):
 		# Ignoring order if it already exists
@@ -162,8 +164,6 @@ class EventHandler:
 
 	def _on_slave_connected(self, data):
 		print(str(data['address']) + ' connected to the server')
-
-		print(self.socket.is_master)
 
 		# Assigning storage for internal orders
 		self.order_matrix.add_elevator(data['address'])
