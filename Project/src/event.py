@@ -139,10 +139,11 @@ class EventHandler:
 				target, target_dir = self.scheduler.plan_next(elevator.Elevator.nodes[data['address']])
 
 				if (data['address'] == self.local_elev.address):
-					self.actions['NEW COMMAND']({
-								'target': 	  target,
-								'target_dir': target_dir
-					})
+					if (target != -1):
+						self.actions['NEW COMMAND']({
+									'target': 	  target,
+									'target_dir': target_dir
+						})
 
 				else:
 					if (target != -1):
@@ -245,6 +246,19 @@ class EventHandler:
 						'target': 		self.local_elev.target,
 						'target_dir': 	self.local_elev.target_dir
 					}
+				)
+
+		elif (self.local_elev.defined_state == False):
+			if (self.socket.is_master):
+				self.actions['ELEV REACHED DEFINED STATE']({
+					'address': self.socket.local_ip
+				})
+
+			else:
+				self.socket.tcp_send(
+					address 	= self.socket.server_ip,
+					title 		= 'ELEV REACHED DEFINED STATE',
+					data 		= {}
 				)
 				
 				# self.local_elev.target = -1
@@ -418,6 +432,7 @@ class EventHandler:
 			)
 
 	def _on_elev_death(self, data):
+		elevator.Elevator.nodes[data['address']].defined_state = False
 		elevator.Elevator.nodes[data['address']].is_dead = True
 
 		if (elevator.Elevator.nodes[data['address']].target != -1):
@@ -425,6 +440,32 @@ class EventHandler:
 				self.order_matrix.external[elevator.Elevator.nodes[data['address']].target][1] = 1
 			if (self.order_matrix.external[elevator.Elevator.nodes[data['address']].target][-1] == 0.5):
 				self.order_matrix.external[elevator.Elevator.nodes[data['address']].target][-1] = 1
+
+		elevator.Elevator.nodes[data['address']].target = -1
+		elevator.Elevator.nodes[data['address']].target_dir = 0
+
+		sorted_elevs = self.scheduler.get_cheapest_command(elevator.Elevator.nodes)
+
+		for elev_dict in sorted_elevs:
+			target, target_dir = self.scheduler.plan_next(elev_dict['elev'])
+
+			if (elev_dict['elev'].address == self.local_elev.address):
+				if (target != -1):
+					self.actions['NEW COMMAND']({
+						'target': 	  target,
+						'target_dir': target_dir
+					})
+
+			else:
+				if (target != -1):
+					self.socket.tcp_send(
+						address 	= elev_dict['elev'].address,
+						title 		= 'NEW COMMAND',
+						data 		= {
+							'target': 	  target,
+							'target_dir': target_dir
+						}
+					)
 
 	def _on_local_elev_resurrection(self, data):
 		#print('>> Elev resurrection')
@@ -437,28 +478,22 @@ class EventHandler:
 				data 		= {}
 			)
 
+		become_defined_thread = threading.Thread(target = self.local_elev.reach_defined_state)
+		become_defined_thread.deamon = True
+		become_defined_thread.start()
+
 	def _on_elev_resurrection(self, data):
 		print('Elev resurrection')
 		elevator.Elevator.nodes[data['address']].is_dead = False
 
-		target, target_dir = self.scheduler.plan_next(elevator.Elevator.nodes[data['address']])
+	def _on_stop(self, data):
+		print('Commanding STOP!')
+		elevator.Elevator.nodes[data['address']].stop()
 
-		if (data['address'] == self.local_elev.address):
-			self.actions['NEW COMMAND']({
-				'target': 	  target,
-				'target_dir': target_dir
-			})
+	def _on_elev_reached_defined_state(self, data):
+		print(data['address'], 'reached defined state')
+		elevator.Elevator.nodes[data['address']].defined_state = True
 
-		else:
-			if (target != -1):
-				self.socket.tcp_send(
-					address 	= data['address'],
-					title 		= 'NEW COMMAND',
-					data 		= {
-						'target': 	  target,
-						'target_dir': target_dir
-					}
-				)
 
 	def __init__(self):
 		self.local_elev 	= None
@@ -466,28 +501,30 @@ class EventHandler:
 		self.order_matrix 	= None
 		self.scheduler 		= None
 		self.actions 		= {
-			'CHAT': 						self._on_chat,
-			'PING': 						self._on_ping,
-			'VITALS': 						self._on_vitals,
-			'NEW LOCAL EXTERNAL ORDER': 	self._on_new_local_external_order,
-			'NEW LOCAL INTERNAL ORDER': 	self._on_new_local_internal_order,
-			'NEW FOREIGN EXTERNAL ORDER': 	self._on_new_foreign_external_order,
-			'NEW FOREIGN INTERNAL ORDER': 	self._on_new_foreign_internal_order,
-			'NEW COMMAND': 					self._on_new_command,
-			'COMMAND COMPLETED': 			self._on_command_completed,
-			'SLAVE DISCONNECTED': 			self._on_slave_disconnected,
-			'SLAVE CONNECTED': 				self._on_slave_connected,
-			'MASTER CONNECTED': 			self._on_master_connected,
-			'MASTER DISCONNECTED': 			self._on_master_disconnected,
-			'ELEV POSITION UPDATE': 		self._on_elev_position_update,
-			'LOCAL ELEV REACHED FLOOR': 	self._on_local_elev_reached_floor,
-			'LOCAL ELEV STARTED MOVING': 	self._on_local_elev_started_moving,
-			'FOREIGN ELEV STARTED MOVING': 	self._on_foreign_elev_started_moving,
-			'DOOR CLOSED': 					self._on_door_closed,
-			'SET LAMP SIGNAL': 				self._on_set_lamp_signal,
-			'SET DOOR': 					self._on_set_door,
-			'LOCAL ELEV DEATH': 			self._on_local_elev_death,
-			'ELEV DEATH': 					self._on_elev_death,
-			'LOCAL ELEV RESURRECTION': 		self._on_local_elev_resurrection,
-			'ELEV RESURRECTION': 			self._on_elev_resurrection,
+			'CHAT': 							self._on_chat,
+			'PING': 							self._on_ping,
+			'VITALS': 							self._on_vitals,
+			'NEW LOCAL EXTERNAL ORDER': 		self._on_new_local_external_order,
+			'NEW LOCAL INTERNAL ORDER': 		self._on_new_local_internal_order,
+			'NEW FOREIGN EXTERNAL ORDER': 		self._on_new_foreign_external_order,
+			'NEW FOREIGN INTERNAL ORDER': 		self._on_new_foreign_internal_order,
+			'NEW COMMAND': 						self._on_new_command,
+			'COMMAND COMPLETED': 				self._on_command_completed,
+			'SLAVE DISCONNECTED': 				self._on_slave_disconnected,
+			'SLAVE CONNECTED': 					self._on_slave_connected,
+			'MASTER CONNECTED': 				self._on_master_connected,
+			'MASTER DISCONNECTED': 				self._on_master_disconnected,
+			'ELEV POSITION UPDATE': 			self._on_elev_position_update,
+			'LOCAL ELEV REACHED FLOOR': 		self._on_local_elev_reached_floor,
+			'LOCAL ELEV STARTED MOVING': 		self._on_local_elev_started_moving,
+			'FOREIGN ELEV STARTED MOVING': 		self._on_foreign_elev_started_moving,
+			'DOOR CLOSED': 						self._on_door_closed,
+			'SET LAMP SIGNAL': 					self._on_set_lamp_signal,
+			'SET DOOR': 						self._on_set_door,
+			'LOCAL ELEV DEATH': 				self._on_local_elev_death,
+			'ELEV DEATH': 						self._on_elev_death,
+			'LOCAL ELEV RESURRECTION': 			self._on_local_elev_resurrection,
+			'ELEV RESURRECTION': 				self._on_elev_resurrection,
+			'ELEV REACHED DEFINED STATE': 		self._on_elev_reached_defined_state
+			#'STOP': 						self._on_stop
 		}
