@@ -87,7 +87,7 @@ class LocalElevator(Elevator):
 							self.button_accessibility_states[floor][button] = False
 							if (button == 0):
 								# External - up
-								handler = threading.Thread(target = self.event_handler.actions['NEW LOCAL EXTERNAL ORDER'], args = [{'floor': floor, 'direction': 1}])Elev 
+								handler = threading.Thread(target = self.event_handler.actions['NEW LOCAL EXTERNAL ORDER'], args = [{'floor': floor, 'direction': 1}])
 								handler.daemon = True
 								handler.start()
 								#self.event_handler.actions['NEW LOCAL EXTERNAL ORDER']({'floor': floor, 'direction': 1})
