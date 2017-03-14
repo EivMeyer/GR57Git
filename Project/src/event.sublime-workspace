@@ -1,0 +1,994 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"t",
+				"poritionTransmitTimer\t*time.Ticker ν"
+			],
+			[
+				"N",
+				"NewTicker\t*time.Ticker ƒ"
+			],
+			[
+				"is",
+				"isInternal\tbool ν"
+			],
+			[
+				"ba",
+				"backupReconeryCh\tchan types.Backup_t ν"
+			],
+			[
+				"se",
+				"setLightsCh\tchan types.Backup_t ν"
+			],
+			[
+				"NUMBER_OF_",
+				"NUMBER_OF_FLOORS\t Ɩ"
+			],
+			[
+				"NUMBER",
+				"NUMBER_OF_FLOORS\t Ɩ"
+			],
+			[
+				"Sd",
+				"Second\t Ɩ"
+			],
+			[
+				"bac",
+				"getBackup\ttypes.Backup_t ƒ"
+			],
+			[
+				"stri",
+				"stringMatrix\t[][]string ν"
+			],
+			[
+				"s",
+				"stopNewOrders\tbuilt-in ν"
+			],
+			[
+				"c",
+				"ChooseDir\tint ƒ"
+			],
+			[
+				"cur",
+				"currentElevDistance\t ν"
+			],
+			[
+				"cl",
+				"ClosestOrdersBlow\tint ƒ"
+			],
+			[
+				"clo",
+				"closestOrder\tint ν"
+			],
+			[
+				"F",
+				"floor\t ν"
+			],
+			[
+				"Ne",
+				"NewTimer\t*time.Timer ƒ"
+			],
+			[
+				"i",
+				"isLoopback\tbool ν"
+			],
+			[
+				"re",
+				"recvPacket\tnetworkPackage_t ν"
+			],
+			[
+				"ac",
+				"ackConn\t*net.UDPConn ν"
+			],
+			[
+				"ack",
+				"ack_t\tstruct ʈ"
+			],
+			[
+				"net",
+				"networkPackage_t\tstruct ʈ"
+			],
+			[
+				"rece",
+				"recvPacket\tnetworkPackage_t ν"
+			],
+			[
+				"recee",
+				"receiveBackupCh\tchan types.Backup_t ν"
+			],
+			[
+				"bu",
+				"button\ttypes.Button_t ν"
+			],
+			[
+				"b",
+				"button\ttypes.Button_t ν"
+			],
+			[
+				"R",
+				"ReadFromUDP\tint, *net.UDPAddr, error ƒ"
+			],
+			[
+				"ip",
+				"IP3\t Ɩ"
+			],
+			[
+				"j",
+				"json_object\t[]byte ν"
+			],
+			[
+				"m",
+				"Marshal\t[]byte, error ƒ"
+			],
+			[
+				"tra",
+				"transmitConn\t*net.UDPConn ν"
+			],
+			[
+				"Dail",
+				"DialUDP\t*net.UDPConn, error ƒ"
+			],
+			[
+				"Resolve",
+				"ResolveUDPAddr\t*net.UDPAddr, error ƒ"
+			],
+			[
+				"Sender",
+				"SenderIP\tstring ν"
+			],
+			[
+				"tr",
+				"transmitCh\tchan StandardData_t ν"
+			],
+			[
+				"e",
+				"eDistance\tint ν"
+			],
+			[
+				"dead",
+				"deadElev\tchan def.ChannelMessage ν"
+			],
+			[
+				"ELE",
+				"ELEV_3\t Ɩ"
+			],
+			[
+				"ELEV",
+				"ELEV_2\t Ɩ"
+			],
+			[
+				"backup",
+				"backupTicker\t*time.Ticker ν"
+			],
+			[
+				"con",
+				"contactDeadElevCounter\tint ν"
+			],
+			[
+				"init",
+				"initGotOrder\t ƒ"
+			],
+			[
+				"Pr",
+				"Println\tn int, err error ƒ"
+			],
+			[
+				"inter",
+				"internalQueueMutex\tchan bool ν"
+			],
+			[
+				"Mi",
+				"Millisecond\t Ɩ"
+			],
+			[
+				"curr",
+				"CurrentOrder\tconstants.Order ν"
+			],
+			[
+				"last",
+				"LastFloor\tint ν"
+			],
+			[
+				"upd",
+				"updateOrdersThatAreHandled\t ƒ"
+			],
+			[
+				"order",
+				"ordersThatAreHandledMutex\tchan bool ν"
+			],
+			[
+				"orders",
+				"ordersThatAreHandledMutex\tchan bool ν"
+			],
+			[
+				"best",
+				"bestFloorSoFar\tconstants.Order ν"
+			],
+			[
+				"pritn",
+				"Println\tn int, err error ƒ"
+			],
+			[
+				"bes",
+				"bestFloorSoFar\tconstants.Order ν"
+			],
+			[
+				"qs",
+				"qs_set_priority"
+			],
+			[
+				"DIRN",
+				"DIRN_DOWN"
+			],
+			[
+				"qs_get_nex",
+				"qs_get_next_dir"
+			],
+			[
+				"qs_set",
+				"qs_set_current_dir"
+			],
+			[
+				"current",
+				"current_dir"
+			],
+			[
+				"next",
+				"next_floor"
+			],
+			[
+				"qs_",
+				"qs_is_order_below"
+			],
+			[
+				"qs_is",
+				"qs_is_order_above"
+			],
+			[
+				"qs_get",
+				"qs_get_dir"
+			],
+			[
+				"elev",
+				"elev_get_floor_sensor_signal"
+			],
+			[
+				"elev_get_",
+				"elev_get_floor_sensor_signal"
+			],
+			[
+				"eelv",
+				"elev_get_floor_sensor_signal"
+			],
+			[
+				"elev_",
+				"elev_set_motor_direction"
+			],
+			[
+				"elev_get",
+				"elev_get_floor_sensor_signal"
+			],
+			[
+				"No",
+				"Now\ttime.Time ƒ"
+			],
+			[
+				"S",
+				"Second\t Ɩ"
+			],
+			[
+				"lo",
+				"local\t[][]OrderStatus ν"
+			],
+			[
+				"hello",
+				"helloTx\tchan HelloMsg ν"
+			],
+			[
+				"he",
+				"HelloMessageTx\tchan HelloMessage ν"
+			],
+			[
+				"light",
+				"lightTx\tchan LightMessage_t ν"
+			],
+			[
+				"M",
+				"Microsecond\t Ɩ"
+			],
+			[
+				"o",
+				"orderFloor\t ν"
+			],
+			[
+				"fa",
+				"False"
+			],
+			[
+				"nu",
+				"Num"
+			],
+			[
+				"ret",
+				"return"
+			],
+			[
+				"Ran",
+				"RandNum"
+			],
+			[
+				"io",
+				"io_SetBit\t ƒ"
+			],
+			[
+				"p",
+				"Println\tn int, err error ƒ"
+			],
+			[
+				"im",
+				"import\timport (...) ʂ"
+			],
+			[
+				"button",
+				"buttonRelease\tbool ν"
+			],
+			[
+				"but",
+				"buttonRelease\tbool ν"
+			],
+			[
+				"number",
+				"numberofOrders\tint ν"
+			],
+			[
+				"func",
+				"func\tfunc {...} ʂ"
+			],
+			[
+				"Print",
+				"Println\tn int, err error ƒ"
+			],
+			[
+				"fun",
+				"func\tFunction"
+			],
+			[
+				"el",
+				"elev_motor_direction\tint ʈ"
+			],
+			[
+				"Eleva",
+				"ElevatorDoorClosed\tstruct ʈ"
+			],
+			[
+				"comma",
+				"commandChannel\tchan ElevatorCommand ν"
+			],
+			[
+				"Elevato",
+				"ElevatorFloorReached\tstruct ʈ"
+			],
+			[
+				"Elevat",
+				"ElevatorGoFloor\tstruct ʈ"
+			],
+			[
+				"start",
+				"StartElevator\t ƒ"
+			],
+			[
+				"Ele",
+				"ElevatorGoFloor\tstruct ʈ"
+			],
+			[
+				"etas",
+				"etasje_bestilling"
+			],
+			[
+				"thre",
+				"thread_IP"
+			],
+			[
+				"C",
+				"CheckError\t ƒ"
+			],
+			[
+				"print",
+				"Println\tn int, err error ƒ"
+			],
+			[
+				"pri",
+				"Println\tn int, err error ƒ"
+			],
+			[
+				"message",
+				"message\tchan string ν"
+			],
+			[
+				"Client",
+				"Clientaddress\t*net.TCPAddr ν"
+			],
+			[
+				"global",
+				"global_numberofIPs\tint ν"
+			],
+			[
+				"prin",
+				"PrintMessage\t ƒ"
+			],
+			[
+				"Send",
+				"SenderType\tstring ν"
+			],
+			[
+				"PR",
+				"Println\tn int, err error ƒ"
+			],
+			[
+				"time",
+				"timeStampMap\tmap[string]time.Time ν"
+			],
+			[
+				"CMD",
+				"CMD_4\t Ɩ"
+			],
+			[
+				"Timed",
+				"timedOutChan\tchan bool ν"
+			],
+			[
+				"Elev",
+				"ElevStateMap\tmap[string]ElevState ν"
+			],
+			[
+				"curre",
+				"currentFloor\tint ν"
+			],
+			[
+				"broadcA",
+				"broadcastErrorStreak\tint ν"
+			],
+			[
+				"pr",
+				"Println\tn int, err error ƒ"
+			],
+			[
+				"dire",
+				"directionToString\tstring ƒ"
+			],
+			[
+				"update",
+				"updateElevDirection\t ƒ"
+			],
+			[
+				"Req",
+				"RequestList\t[]Request ʈ"
+			],
+			[
+				"rqeusts",
+				"requests\tRequestList ν"
+			],
+			[
+				"REq",
+				"RequestList\t[]Request ʈ"
+			],
+			[
+				"cost",
+				"costsSorted\t[]int ν"
+			],
+			[
+				"requ",
+				"requestDirection\tdriver.Direction ν"
+			],
+			[
+				"requst",
+				"request\tRequest ν"
+			],
+			[
+				"de",
+				"destinationDirection\tdriver.Direction ν"
+			],
+			[
+				"lowe",
+				"lowestCostElev\t ν"
+			],
+			[
+				"req",
+				"requestCostsSorted\t ν"
+			],
+			[
+				"los",
+				"lowestCostElev\t ν"
+			],
+			[
+				"ElevSet",
+				"ElevSetMotorDirection\t ƒ"
+			],
+			[
+				"P",
+				"Println\tn int, err error ƒ"
+			],
+			[
+				"Low",
+				"lowestCostElev\t ν"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 96.0,
+		"last_filter": "package Co in",
+		"selected_items":
+		[
+			[
+				"package Co in",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 485.0
+	},
+	"console":
+	{
+		"height": 57.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = '2915d1851351e5ee549c20394736b442' + '8bc59f460fa1548d1514676163dafc88'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by) ",
+			" import urllib.request,os,hashlib; h = '2915d1851351e5ee549c20394736b442' + '8bc59f460fa1548d1514676163dafc88'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by) "
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/student/Gruppe 57/GR57Git/GR57Git/Project/src/main.py",
+		"/home/student/Gruppe 57/GR57Git/GR57Git/Project/src/scheduling.py",
+		"/home/student/Gruppe 57/GR57Git/GR57Git/Project/src/orders.py",
+		"/home/student/Gruppe 57/GR57Git/GR57Git/Project/src/event.py",
+		"/home/student/Gruppe 57/GR57Git/GR57Git/Project/src/elevator.py",
+		"/home/student/Gruppe 57/GR57Git/GR57Git/Project/src/config.py",
+		"/home/student/Gruppe 57/GR57Git/GR57Git/Project/src/network.py",
+		"/home/student/gruppe181/src/master/masterQueue.go",
+		"/home/student/gruppe181/src/types/types.go",
+		"/home/student/gruppe181/src/main/main.go",
+		"/home/student/gruppe181/src/master/master.go",
+		"/home/student/gruppe181/src/hardware/elev.go",
+		"/home/student/gruppe181/src/slave/slave.go",
+		"/home/student/gruppe181/src/hardware/elevator.go",
+		"/home/student/gruppe181/src/test/testnetwork.go",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/elevatorMap/backup.go",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/main/main.go",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/network/network.go",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/def/def.go",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/elevatorMap/elevatorMap.go",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/fsm/fsm.go",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/elevatorMap/backup.txt",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/hardware/elev.go",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/hardware/hardware.go",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/hardware/io.h",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/hardware/simulator.con",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/hardware/io.go",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/hardware/channels.go",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/hardware/channels.h",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/elevatorMap/memory.txt",
+		"/home/student/gruppe182/Sanntid/src/types/types.go",
+		"/home/student/gruppe182/Sanntid/src/main/main.go",
+		"/home/student/gruppe182/Sanntid/src/hardware/elev.go",
+		"/home/student/gruppe182/Sanntid/src/slave/slave.go",
+		"/home/student/gruppe181/src/hardware/io.go",
+		"/home/student/gruppe181/src/hardware/channels.go",
+		"/home/student/gruppe18/temp/internal_queue.go",
+		"/home/student/gruppe18/temp/driveelevator.go",
+		"/home/student/gruppe18/temp/statemachine.go",
+		"/home/student/gruppe18/temp/io.h",
+		"/home/student/gruppe18/temp/io.c",
+		"/home/student/gruppe18/temp/io.go",
+		"/home/student/gruppe18/temp/channels.go",
+		"/home/student/gruppe18/temp/elevator.go",
+		"/home/student/gruppe18/src/test/testnetwork.go",
+		"/home/student/gruppe5/elev2/TTK4145/Elevator/src/def/def.go",
+		"/home/student/gruppe18/src/main/main.go",
+		"/home/student/gruppe5/elev2/TTK4145/Elevator/src/hardware/elev.go",
+		"/home/student/gruppe5/elev2/TTK4145/Elevator/src/fsm/fsm.go",
+		"/home/student/gruppe5/elev2/TTK4145/Elevator/src/hardware/hardware.go",
+		"/home/student/gruppe5/elev1/TTK4145/Exercises/ex6/main.go",
+		"/home/student/gruppe5/elev1/TTK4145/Elevator/src/elevatorMap/memoryTest.txt",
+		"/home/student/go/src/github.com/Adrian_Even_adrian/move/move.go",
+		"/home/student/go/src/github.com/Adrian_Even_adrian/network/bcast/bcast.go",
+		"/home/student/gruppe16/main.go",
+		"/home/student/go/src/github.com/Adrian_Even_adrian/queue/calculatepriority.go",
+		"/home/student/go/src/github.com/Adrian_Even_adrian/queue/opendoor.go",
+		"/home/student/go/src/github.com/Adrian_Even_adrian/queue/queue.go",
+		"/home/student/Documents/Stinahf/StinaLill-heis-master/src/config/config.go",
+		"/home/student/Documents/Stinahf/StinaLill-heis-master/src/queue/helpFunctions.go",
+		"/home/student/Documents/Stinahf/StinaLill-heis-master/src/queue/queue.go",
+		"/home/student/Documents/Stinahf/StinaLill-heis-master/src/eventManager/eventManager.go",
+		"/home/student/Documents/Stinahf/StinaLill-heis-master/src/main/main.go",
+		"/home/student/Documents/Stinahf/StinaLill-heis-master/src/liftAssigner/liftAssigner.go",
+		"/home/student/Documents/Stinahf/StinaLill-heis-master/src/Network/bcast.go",
+		"/home/student/Documents/Stinahf/StinaLill-heis-master/src/hw/channels.h",
+		"/home/student/Documents/Stinahf/StinaLill-heis-master/src/hw/channels.go",
+		"/home/student/Documents/Stinahf/StinaLill-heis-master/src/hw/io.go",
+		"/home/student/Documents/Stinahf/StinaLill-heis-master/src/hw/elev.go",
+		"/home/student/Documents/TTK4145/project/toDo.txt",
+		"/home/student/Documents/TTK4145/project/constants/constants.go",
+		"/home/student/Documents/TTK4145/project/main.go",
+		"/home/student/Documents/TTK4145/project/network/network.go",
+		"/home/student/Documents/TTK4145/project/elevator/elevator.go",
+		"/home/student/Documents/TTK4145/project/queue/queue.go",
+		"/home/student/Documents/TTK4145/project/driver/cwrapper.go",
+		"/home/student/Documents/TTK4145/exercises/exercise_6/netwmain.go",
+		"/home/student/.cache/.fr-rFeC9K/timer.h",
+		"/home/student/.cache/.fr-rFeC9K/timer.c",
+		"/home/student/Desktop/sugenheis/qs.h",
+		"/home/student/.cache/.fr-rFeC9K/Makefile",
+		"/home/student/.cache/.fr-rFeC9K/io.h",
+		"/home/student/Desktop/sugenheis/fsm.h",
+		"/home/student/.cache/.fr-rFeC9K/io.c",
+		"/home/student/.cache/.fr-rFeC9K/elev.h",
+		"/home/student/.cache/.fr-rFeC9K/elev.c",
+		"/home/student/.cache/.fr-rFeC9K/channels.h",
+		"/home/student/Desktop/sugenheis/qs.c",
+		"/home/student/Desktop/sugenheis/fsm.c",
+		"/home/student/Desktop/sugenheis/main.c",
+		"/home/student/.cache/.fr-rFeC9K/fsm.h",
+		"/home/student/.cache/.fr-yuL8iE/fsm.c",
+		"/home/student/.cache/.fr-rFeC9K/qs.h",
+		"/home/student/.cache/.fr-rFeC9K/qs.c",
+		"/home/student/.cache/.fr-rFeC9K/fsm.c",
+		"/home/student/.cache/.fr-rFeC9K/heis",
+		"/home/student/.cache/.fr-rFeC9K/main.c",
+		"/home/student/.cache/.fr-Zoav2F/channels.h",
+		"/home/student/.cache/.fr-Cdvn0p/elev.c",
+		"/home/student/.cache/.fr-VNoiwh/elev.h",
+		"/home/student/.cache/.fr-oaObbP/io.c",
+		"/home/student/.cache/.fr-Z1JMHt/io.h",
+		"/home/student/.cache/.fr-2aqNkW/qs.h",
+		"/home/student/.cache/.fr-Tjz0Rs/qs.c",
+		"/home/student/.cache/.fr-Ti9sIA/timer.c",
+		"/home/student/.cache/.fr-UbcUqq/timer.h",
+		"/home/student/.cache/.fr-JC1N1r/fsm.h",
+		"/home/student/.cache/.fr-EgpAx9/timer.h",
+		"/home/student/.cache/.fr-TaJpYq/timer.h",
+		"/home/student/.cache/.fr-6RivEh/fsm.c",
+		"/home/student/.cache/.fr-WqUgmj/main.c",
+		"/home/student/Documents/sanntid012017/TTK4145/project/src/config/config.go",
+		"/home/student/Documents/sanntid012017/TTK4145/project/src/elevator/elevator.go",
+		"/home/student/Documents/sanntid012017/TTK4145/project/src/network/network.go",
+		"/home/student/Documents/sanntid012017/TTK4145/project/commands",
+		"/home/student/Documents/sanntid012017/TTK4145/project/src/queue/queue.go",
+		"/home/student/Documents/sanntid012017/TTK4145/project/main.go",
+		"/home/student/Documents/sanntid012017/TTK4145/Exercises/Ex07-Backward-error-recovery/exercise7.adb",
+		"/home/student/Documents/sanntid012017/TTK4145/project/lift_backup.json",
+		"/media/student/USBDISKPRO/backup.go",
+		"/home/student/Documents/sanntidgr012017/TTK4145 new/src/elevator/elevator.go",
+		"/home/student/Documents/sanntidgr012017/TTK4145 new/src/queue/queue.go",
+		"/home/student/Documents/sanntidgr012017/TTK4145 new/main.go",
+		"/home/student/Documents/sanntidgr012017/TTK4145 new/src/network/network.go",
+		"/home/student/Documents/sanntidgr012017/TTK4145 new/src/config/config.go",
+		"/home/student/Documents/sanntidgr012017/TTK4145 new/src/printer/helpers.go",
+		"/home/student/Documents/sanntidgr012017/TTK4145 new/src/network/peer.go",
+		"/home/student/Documents/sanntidgr012017/TTK4145 new/src/network/syncPeers.go"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 93.0,
+		"where_history":
+		[
+			"<current file>",
+			"/home/student/gruppe5/elev1/TTK4145/Elevator/src",
+			"<current file>",
+			"/home/student/gruppe5/elev1/TTK4145/Elevator/src",
+			"<current file>",
+			"/home/student/gruppe5/elev1/TTK4145/Elevator/src",
+			"<current file>",
+			"/home/student/gruppe5/elev1/TTK4145/Elevator/src",
+			"<current file>",
+			"/home/student/G39/Elevator-project,<current file>,/home/student/Desktop/PLASS21/elevator"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"MY_ID",
+			"ackreceived",
+			"def.PORT",
+			"def.IPs",
+			"GoToNearestFloor",
+			"IoInit",
+			"currentMap",
+			"localMap",
+			"localmap",
+			"def.def",
+			"iAmClosest",
+			"orderOnFloor",
+			"DOOR_CLOSED",
+			"DOOR_OPEN",
+			"DOWN",
+			"UP",
+			"STILL",
+			"def.STILL",
+			"STILL",
+			"}\n",
+			"f",
+			"m",
+			"currentDir",
+			"watchdog",
+			"timer",
+			"memory.txt",
+			"getLocalMap",
+			"GetMap",
+			"setMap",
+			"AddNewEvent",
+			"def.ElevMap",
+			"backup",
+			"stringMatrix",
+			"Door",
+			"Pos",
+			"Dir",
+			"def.Dir",
+			"IPs",
+			"IP_ELEV_3",
+			"[elev]",
+			"elev",
+			"clostestOrder",
+			"closetsOrder",
+			"conn",
+			"FLOOR",
+			"time",
+			"LOCAL_ID",
+			"networkPackage",
+			"bool",
+			"conn",
+			"*globSimConn.conn",
+			"conn",
+			"mutex",
+			"log",
+			"noConnection",
+			"localmap",
+			"dir",
+			"MY_ID",
+			"A",
+			"outDataChan",
+			"internalQueueMutex",
+			"testIfOnline",
+			"orderedFloorReachedRoutine",
+			"addedNewOrder",
+			"updateElevatorNext",
+			"fmt.Println",
+			"updateOrdersThatNeedToBeAdded",
+			"ordersThatNeedToBeAdded",
+			"deleteOrderFromExternalQueue",
+			"orderIsInNeedToBeAdded",
+			"setLights",
+			"orderAlreadyNeedstoBeAdded",
+			"orderIsInNeedToBeAdded",
+			"indexesToDelete",
+			" =",
+			"updateOrdersThatAreHandled",
+			"();\n",
+			"());",
+			"\");\n",
+			"() ",
+			">\n",
+			"currentOrder",
+			"myRemoteOrders.",
+			"*queue",
+			"queue",
+			"Queue",
+			"queue",
+			"queue.GetLocalOrder(",
+			"GetLocalOrder",
+			"queue.GetLocalOrder(",
+			"atFloor",
+			"queue.GetLocalOrder(atFloor",
+			"queue.GetLocalOrder(",
+			"Wait_Until_aborted",
+			"Wait_Until_Aborted",
+			"select",
+			"manager",
+			"Btni",
+			"btnOrder",
+			"\"　　　",
+			"\\n\"",
+			"\"",
+			"peersHeap",
+			"Elevator",
+			"elevator",
+			"peer",
+			"elevator",
+			"dd",
+			"}\n",
+			"order.",
+			"LIGHT_UP",
+			"BTN_UP",
+			"BTN_UP1",
+			"Finished'Count",
+			"Rand",
+			"newBackup",
+			"f",
+			"IO",
+			"io",
+			"IO",
+			"io",
+			"IO",
+			"\t\t\t\t\t\t\t\t\t\t\t\t\t",
+			"1000000",
+			"innerLights",
+			"msg",
+			"add",
+			"||"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": true,
+		"replace_history":
+		[
+			"PORT",
+			"IPs",
+			"InitIO",
+			"currentMap",
+			"def",
+			"isClosestElevator",
+			"def.DOWN",
+			"def.UP",
+			"def.STILL",
+			"currentMap",
+			"currentDirection",
+			"idleTimeoutTimer",
+			"doorTimer",
+			"backup.txt",
+			"GetLocalMap",
+			"getLocalMap",
+			"setLocalMap",
+			"elevatorMap.ElevMap",
+			"stringMap",
+			"Position",
+			"Direction",
+			"[elev-1]",
+			"elev-1",
+			"closestOrder",
+			"(*conn)",
+			"networkPackage_t",
+			"(*conn)",
+			"*conn",
+			"globSimConn.conn",
+			"*globSimConn.conn",
+			"globSimConn",
+			"msgChan_fromFsm",
+			"Registered_Elevators",
+			"External_Orders_Down",
+			"LastByteIP",
+			"",
+			"ElevatorList[0]",
+			"SortQueue",
+			"elevDriver",
+			"next",
+			"[3]int",
+			"aliveChannels"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 26.0
+	},
+	"input":
+	{
+		"height": 33.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "Packages/Python/Python.sublime-build",
+	"project": "event.sublime-project",
+	"replace":
+	{
+		"height": 48.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"net",
+				"network/network.go"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 392.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 392.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 306.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
