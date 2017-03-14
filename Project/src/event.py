@@ -129,6 +129,16 @@ class EventHandler:
 				'button': 		2,
 				'state': 		1
 			})
+		else:
+			self.socket.tcp_send(
+				address 	= data['address'],
+				title 		= 'SET LAMP SIGNAL',
+				data 		= {
+					'floor': 		data['floor'],
+					'button': 		2,
+					'state': 		1
+				}
+			)
 
 		if (self.socket.is_master):
 			self.socket.tcp_broadcast(
@@ -271,17 +281,19 @@ class EventHandler:
 		print('\nCommand completed (target ' + str(data['target']) + ' target_dir: ' + str(data['target_dir']) + ')')
 		print('Address: ', data['address'])
 		pprint(self.order_matrix.external)
+
+		if (data['target_dir'] == 0):
+			self.order_matrix.internal[data['address']][data['target']] = 0
+			if (self.order_matrix.external[data['target']][1] == 0.5):
+				self.order_matrix.external[data['target']][1] = 0
+			if (self.order_matrix.external[data['target']][-1] == 0.5):
+				self.order_matrix.external[data['target']][-1] = 0
+
+		else:
+			self.order_matrix.external[data['target']][data['target_dir']] = 0
 		
 		if (self.socket.is_master):
-			if (data['target_dir'] == 0):
-				self.order_matrix.internal[data['address']][data['target']] = 0
-				if (self.order_matrix.external[data['target']][1] == 0.5):
-					self.order_matrix.external[data['target']][1] = 1
-				if (self.order_matrix.external[data['target']][-1] == 0.5):
-					self.order_matrix.external[data['target']][-1] = 1
-
-			else:
-				self.order_matrix.external[data['target']][data['target_dir']] = 0
+			
 
 			self.socket.tcp_broadcast(
 				title 		= 'COMMAND COMPLETED',

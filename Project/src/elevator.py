@@ -46,22 +46,22 @@ class LocalElevator(Elevator):
 			# Checking current floor signal
 			floor_signal = self.api.elev_get_floor_sensor_signal()
 
-			db = []
-			for k in range(1000):
-				if (self.api.io_read_bit(k) > 0):
-					db.append(k)
-			#print(db)
-			if (db != self.debug):
-				print(db)
-			self.debug = db
+			# db = []
+			# for k in range(1000):
+			# 	if (self.api.io_read_bit(k) > 0):
+			# 		db.append(k)
+			# #print(db)
+			# if (db != self.debug):
+			# 	print(db)
+			# self.debug = db
 			
-			if (len(db) >  10):
-				self.last_error = time.time()
-				if (not self.is_motorbox_dead):
-					self.last_death = time.time()
-					self.event_handler.actions['LOCAL DEATH']({
-						'reason': 'motorbox'
-					})
+			# if (len(db) >  10):
+			# 	self.last_error = time.time()
+			# 	if (not self.is_motorbox_dead):
+			# 		self.last_death = time.time()
+			# 		self.event_handler.actions['LOCAL DEATH']({
+			# 			'reason': 'motorbox'
+			# 		})
 
 			if (time.time() - self.last_error > 2 and self.is_motorbox_dead):
 				self.event_handler.actions['LOCAL RESURRECTION']({})
