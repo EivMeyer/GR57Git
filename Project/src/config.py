@@ -2,8 +2,9 @@ N_FLOORS 	= 4
 N_BUTTONS 	= 3
 
 SERVER_HIERARCHY = [
-	'129.241.187.140',	# Labplass 1
 	'129.241.187.141', 	# Labplass 4
+	'129.241.187.140',	# Labplass 1
+	
 	'129.241.187.54', 	# Labplass 25
 	'129.241.187.46',  	# Labplass 24
 	'129.241.187.157', 	# Labplass 19
