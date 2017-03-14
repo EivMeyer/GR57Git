@@ -66,13 +66,15 @@ class LocalElevator(Elevator):
 			if (time.time() - self.last_error > 2 and self.is_motorbox_dead):
 				self.event_handler.actions['LOCAL RESURRECTION']({})
 
-			# if (time.time() - self.command_timer > 5 and floor_signal == -1):
-			# 	if (not self.is_elev_dead and not self.is_motorbox_dead):
-			# 		print(time.time() - self.command_timer, floor_signal)
-			# 		self.last_death = time.time()
-			# 		self.event_handler.actions['LOCAL DEATH']({
-			# 			'reason': 'elev'
-			# 		})
+			if (i % 1000 == 0):
+				print(time.time() - self.command_timer, floor_signal, self.is_elev_dead, self.is_motorbox_dead)
+			if (time.time() - self.command_timer > 5 and floor_signal == -1):
+				if (not self.is_elev_dead and not self.is_motorbox_dead):
+					print(time.time() - self.command_timer, floor_signal)
+					self.last_death = time.time()
+					self.event_handler.actions['LOCAL DEATH']({
+						'reason': 'elev'
+					})
 
 			if (self.is_motorbox_dead):
 				self.stop()
@@ -146,7 +148,6 @@ class LocalElevator(Elevator):
 	def move_to(self, target, target_dir):
 		current_dir 			= self.dir
 		self.command_timer 		= time.time()
-		self.last_floor 		= self.floor
 		self.target 			= target
 		self.target_dir 		= target_dir
 		if (self.target > self.floor):
@@ -185,7 +186,7 @@ class LocalElevator(Elevator):
 
 	def reach_defined_state(self): 
 		print('Reaching defined state...')
-		self.last_floor  	= -1
+		#self.last_floor  	= -1
 		self.defined_state 	= False
 		self.start_time 	= time.time()
 		self.target 		= -1
