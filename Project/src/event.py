@@ -415,7 +415,7 @@ class EventHandler:
 		print('<< Setting door to ' + str(data['state']))
 		self.local_elev.api.elev_set_door_open_lamp(data['state'])
 		self.local_elev.door_open = True if data['state'] == 1 else False
-		self.local_elev.time_out = time.time()
+		self.local_elev.door_timer = time.time()
 
 	def _on_set_order_state(self, data):
 		pass
