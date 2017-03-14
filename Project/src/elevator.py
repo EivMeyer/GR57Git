@@ -66,13 +66,13 @@ class LocalElevator(Elevator):
 			if (time.time() - self.last_error > 2 and self.is_motorbox_dead):
 				self.event_handler.actions['LOCAL RESURRECTION']({})
 
-			if (time.time() - self.command_timer > 5 and floor_signal == -1):
-				if (not self.is_elev_dead and not self.is_motorbox_dead):
-					print(time.time() - self.command_timer, floor_signal)
-					self.last_death = time.time()
-					self.event_handler.actions['LOCAL DEATH']({
-						'reason': 'elev'
-					})
+			# if (time.time() - self.command_timer > 5 and floor_signal == -1):
+			# 	if (not self.is_elev_dead and not self.is_motorbox_dead):
+			# 		print(time.time() - self.command_timer, floor_signal)
+			# 		self.last_death = time.time()
+			# 		self.event_handler.actions['LOCAL DEATH']({
+			# 			'reason': 'elev'
+			# 		})
 
 			if (self.is_motorbox_dead):
 				self.stop()
