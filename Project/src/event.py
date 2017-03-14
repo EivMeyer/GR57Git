@@ -42,7 +42,7 @@ class EventHandler:
 	def _on_new_local_external_order(self, data):
 		with lock:
 			time.sleep(0.5)
-			if (self.local_elev.is_dead):
+			if (self.local_elev.is_motorbox_dead):
 				return
 			print('>> New local external order (floor: ' + str(data['floor']) + ', direction: ' + str(data['direction']) + ')')
 
@@ -59,7 +59,7 @@ class EventHandler:
 	def _on_new_local_internal_order(self, data):
 		with lock:
 			time.sleep(0.5)
-			if (self.local_elev.is_dead):
+			if (self.local_elev.is_motorbox_dead):
 				return
 			print('>> New local internal order (floor: ' + str(data['floor']) + ')')
 			if (self.socket.is_master):
@@ -192,7 +192,7 @@ class EventHandler:
 	def _on_slave_disconnected(self, data):
 		print(str(data['address'][0]) + ' disconnected from the server')
 
-		elevator.Elevator.nodes[data['address']].is_is_dead = True
+		elevator.Elevator.nodes[data['address']].is_disconnected = True
 
 		# Deallocating storage for internal orders
 		self.order_matrix.remove_elevator(data['address']) 
@@ -422,20 +422,29 @@ class EventHandler:
 		#if (data['is_internal']):
 			#self.order_matrix.internal[data['ip']][data['target']] = 0
 
-	def _on_local_elev_death(self, data):
-		print('>> Elev death')
+	def _on_local_death(self, data):
+		print('>> Elev death: ' + data['reason'])
 		if (self.socket.is_master):
-			self.actions['ELEV DEATH']({'address': self.local_elev.address})
+			self.actions['DEATH']({
+				'address': self.local_elev.address,
+				'reason': data['reason']
+			})
 		else:
 			self.socket.tcp_send(
 				address 	= self.socket.server_ip,
-				title 		= 'ELEV DEATH',
-				data 		= {}
+				title 		= 'DEATH',
+				data 		= data
 			)
 
-	def _on_elev_death(self, data):
+	def _on_death(self, data):
 		elevator.Elevator.nodes[data['address']].defined_state = False
-		elevator.Elevator.nodes[data['address']].is_dead = True
+
+		if (data['reason'] == 'motorbox'):
+			elevator.Elevator.nodes[data['address']].is_motorbox_dead = True
+		elif (data['reason'] == 'elev'):
+			elevator.Elevator.nodes[data['address']].is_elev_dead = True
+		else:
+			raise Exception('Unknown cause of death')
 
 		if (elevator.Elevator.nodes[data['address']].target != -1):
 			if (self.order_matrix.external[elevator.Elevator.nodes[data['address']].target][1] == 0.5):
@@ -469,14 +478,16 @@ class EventHandler:
 						}
 					)
 
-	def _on_local_elev_resurrection(self, data):
+	def _on_local_resurrection(self, data):
 		#print('>> Elev resurrection')
+		self.local_elev.command_timer = time.time()
+
 		if (self.socket.is_master):
-			self.actions['ELEV RESURRECTION']({'address': self.local_elev.address})
+			self.actions['RESURRECTION']({'address': self.local_elev.address})
 		else:
 			self.socket.tcp_send(
 				address 	= self.socket.server_ip,
-				title 		= 'ELEV RESURRECTION',
+				title 		= 'RESURRECTION',
 				data 		= {}
 			)
 
@@ -484,9 +495,10 @@ class EventHandler:
 		become_defined_thread.deamon = True
 		become_defined_thread.start()
 
-	def _on_elev_resurrection(self, data):
+	def _on_resurrection(self, data):
 		print('Elev resurrection')
-		elevator.Elevator.nodes[data['address']].is_dead = False
+		elevator.Elevator.nodes[data['address']].is_motorbox_dead = False
+		elevator.Elevator.nodes[data['address']].is_elev_dead = False
 
 	def _on_stop(self, data):
 		print('Commanding STOP!')
@@ -549,10 +561,10 @@ class EventHandler:
 			'DOOR CLOSED': 						self._on_door_closed,
 			'SET LAMP SIGNAL': 					self._on_set_lamp_signal,
 			'SET DOOR': 						self._on_set_door,
-			'LOCAL ELEV DEATH': 				self._on_local_elev_death,
-			'ELEV DEATH': 						self._on_elev_death,
-			'LOCAL ELEV RESURRECTION': 			self._on_local_elev_resurrection,
-			'ELEV RESURRECTION': 				self._on_elev_resurrection,
+			'LOCAL DEATH': 						self._on_local_death,
+			'DEATH': 							self._on_death,
+			'LOCAL RESURRECTION': 				self._on_local_resurrection,
+			'RESURRECTION': 					self._on_resurrection,
 			'ELEV REACHED DEFINED STATE': 		self._on_elev_reached_defined_state
 			#'STOP': 						self._on_stop
 		}

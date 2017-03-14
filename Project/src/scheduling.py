@@ -15,7 +15,7 @@ class Scheduler:
 		for address in elevators:
 			elev = elevators[address]
 
-			if (elev.door_open or elev.is_dead):
+			if (elev.door_open or elev.is_disconnected or elev.is_motorbox_dead or elev.is_elev_dead):
 				continue
 
 			elev_min_cost, elev_min_target, elev_min_target_dir = self.get_best_command_for_elev(elev)
@@ -41,12 +41,15 @@ class Scheduler:
 		#pprint(self.order_matrix.external)
 
 		for floor in range(0, config.N_FLOORS):
-			if (self.order_matrix.internal[elev.address][floor] == 1):
-				cost = self.cost(elev, floor, 0, 1)
-				if (cost < min_cost):
-					min_cost = cost
-					min_target = floor
-					min_target_dir = 0
+			try:
+				if (self.order_matrix.internal[elev.address][floor] == 1):
+					cost = self.cost(elev, floor, 0, 1)
+					if (cost < min_cost):
+						min_cost = cost
+						min_target = floor
+						min_target_dir = 0
+			except KeyError:
+				pass
 			
 			if (self.order_matrix.external[floor][1] == 1):
 				cost = self.cost(elev, floor, 1, 0)

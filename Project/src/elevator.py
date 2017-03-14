@@ -10,7 +10,8 @@ import network
 
 class Elevator:
 	def __init__(self, address):
-		self.is_is_dead 		= False
+		self.is_disconnected 	= False
+		self.command_timer		= time.time()
 		self.event_handler 		= None
 		self.floor 				= 3000
 		self.last_floor 		= self.floor
@@ -19,40 +20,60 @@ class Elevator:
 		self.address 			= address
 		self.dir 				= 0
 		self.door_open 			= False
-		self.is_dead 			= False
 		self.error_counter  	= 0
 		self.defined_state 		= False
+		self.is_motorbox_dead 	= False
+		self.is_elev_dead 		= False
 		self.start_time 		= time.time()
 		self.last_death 		= time.time()
-		self.time_out 			= time.time()
+		self.door_timer 		= time.time()
 		self.last_heartbeat 	= time.time()
 		self.last_error 		= time.time()
+
+		self.debug = None
 		
 # Static array that contains all elevators 
 Elevator.nodes = {}
 
 class LocalElevator(Elevator):
 	def poll(self):
+		i = 0
 		while (True):
-
+			i += 1
 			# Based on empirical observations, bit 791 will change rapidly when the elevator has lost its power
 			# Otherwise it will always stay at 1
+
+			# Checking current floor signal
+			floor_signal = self.api.elev_get_floor_sensor_signal()
 
 			db = []
 			for k in range(1000):
 				if (self.api.io_read_bit(k) > 0):
 					db.append(k)
+			#print(db)
+			if (db != self.debug):
+				print(db)
+			self.debug = db
 			
 			if (len(db) >  10):
 				self.last_error = time.time()
-				if (not self.is_dead):
+				if (not self.is_motorbox_dead):
 					self.last_death = time.time()
-					self.event_handler.actions['LOCAL ELEV DEATH']({})
+					self.event_handler.actions['LOCAL DEATH']({
+						'reason': 'motorbox'
+					})
 
-			if (time.time() - self.last_error > 5 and self.is_dead):
-				self.event_handler.actions['LOCAL ELEV RESURRECTION']({})
+			if (time.time() - self.last_error > 2 and self.is_motorbox_dead):
+				self.event_handler.actions['LOCAL RESURRECTION']({})
 
-			if (self.is_dead):
+			if (time.time() - self.command_timer > 4 and floor_signal == -1):
+				if (not self.is_elev_dead and not self.is_motorbox_dead):
+					self.last_death = time.time()
+					self.event_handler.actions['LOCAL DEATH']({
+						'reason': 'elev'
+					})
+
+			if (self.is_motorbox_dead):
 				self.stop()
 				continue
 
@@ -87,7 +108,7 @@ class LocalElevator(Elevator):
 						self.button_accessibility_states[floor][button] = True
 
 
-			if (time.time() - self.time_out > 2 and self.door_open):
+			if (time.time() - self.door_timer > 2 and self.door_open):
 				self.event_handler.actions['SET DOOR']({
 					'state': 		0
 				})
@@ -98,15 +119,19 @@ class LocalElevator(Elevator):
 			if (self.door_open):
 				continue
 
-			# Checking current floor signal
-			floor_signal = self.api.elev_get_floor_sensor_signal()
+			#if (i % 100 == 0):
+				#print(i, floor_signal)
 
 			# Checking if elevator has reached a new floor
 			if (floor_signal != -1):
+				#print(i, floor_signal, self.floor, self.last_floor, self.dir, self.defined_state)
 				if (self.floor != self.last_floor):
 					if (self.dir == (1 if (floor_signal > self.last_floor) else -1) or self.defined_state == False):
 						self.floor 		= floor_signal
 						self.last_floor = self.floor
+						self.command_timer = time.time()
+						if (self.is_elev_dead):
+							self.event_handler.actions['LOCAL RESURRECTION']({})
 						self.event_handler.actions['LOCAL ELEV REACHED FLOOR']({
 							'address': self.address,
 							'floor': self.floor
@@ -118,10 +143,11 @@ class LocalElevator(Elevator):
 
 			
 	def move_to(self, target, target_dir):
-		current_dir = self.dir
-
-		self.target = target
-		self.target_dir = target_dir
+		current_dir 			= self.dir
+		self.command_timer 		= time.time()
+		self.last_floor 		= self.floor
+		self.target 			= target
+		self.target_dir 		= target_dir
 		if (self.target > self.floor):
 			self.dir = 1
 		elif (self.target == self.floor):
@@ -212,8 +238,8 @@ def elev_watchdog(socket, event_handler):
 		time.sleep(1)
 		for address in Elevator.nodes:
 			elev = Elevator.nodes[address]
-			if (elev.address != socket.local_ip and not elev.is_is_dead):
-				if (time.time() - elev.last_heartbeat > 3):
+			if (elev.address != socket.local_ip):
+				if (time.time() - elev.last_heartbeat > 3 and not elev.is_disconnected):
 					event_handler.actions['SLAVE DISCONNECTED']({'address': elev.address})
 
 		

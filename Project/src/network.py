@@ -98,8 +98,14 @@ class Socket:
 
 	def udp_send(self, msg, address):
 		msg = msg.encode('UTF-8')
-		udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		udp_socket.sendto(msg, (address, self.port))
+
+		try:
+			udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+			udp_socket.sendto(msg, (address, self.port))
+		except socket.error as e:
+			return False
+
+		return True
 
 	def tcp_broadcast(self, title, data):
 		for address in self.connections:
@@ -194,7 +200,8 @@ class Socket:
 		# Telling other machines to connect to this one
 		for i in range(config.SERVER_HIERARCHY.index(self.local_ip) + 1, len(config.SERVER_HIERARCHY)):
 			ip = config.SERVER_HIERARCHY[i]
-			self.udp_send('MASTER_CONNECTED', ip)
+			while (not self.udp_send('MASTER_CONNECTED', ip)):
+				pass
 
 	def client(self, server_ip):
 		print('Connecting to ' + server_ip + '...')
