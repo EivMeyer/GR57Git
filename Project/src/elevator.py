@@ -36,15 +36,16 @@ class Elevator:
 Elevator.nodes = {}
 
 class LocalElevator(Elevator):
-	def poll(self):
+	def run(self):
 		i = 0
 		while (True):
 			i += 1
-			# Based on empirical observations, bit 791 will change rapidly when the elevator has lost its power
-			# Otherwise it will always stay at 1
 
 			# Checking current floor signal
 			floor_signal = self.api.elev_get_floor_sensor_signal()
+
+			# Based on empirical observations, bit 791 will change rapidly when the elevator has lost its power
+			# Otherwise it will always stay at 1
 
 			# db = []
 			# for k in range(1000):
@@ -80,7 +81,7 @@ class LocalElevator(Elevator):
 				self.stop()
 				continue
 
-			# Checking buttons,
+			# Checking buttons
 			for floor in range(config.N_FLOORS):
 				for button in range(config.N_BUTTONS):
 					# Checking if button is pressed
@@ -122,12 +123,8 @@ class LocalElevator(Elevator):
 			if (self.door_open):
 				continue
 
-			#if (i % 100 == 0):
-				#print(i, floor_signal)
-
 			# Checking if elevator has reached a new floor
 			if (floor_signal != -1):
-				#print(i, floor_signal, self.floor, self.last_floor, self.dir, self.defined_state)
 				if (self.floor != self.last_floor):
 					if (self.dir == (1 if (floor_signal > self.last_floor) else -1) or self.defined_state == False):
 						self.floor 		= floor_signal
@@ -162,31 +159,15 @@ class LocalElevator(Elevator):
 		else:
 			self.dir = -1
 
-		#print('Moving to', self.target, 'direction', self.dir, 'current floor', self.floor, 'current_dir:', current_dir)
-		#if (current_dir != self.dir):
-
 		print('>> Elev moving to ' + str(target) + ' (' + str(self.dir) + ')')
 		self.api.elev_set_motor_direction(c_int(self.dir))
-
-		
 
 	def stop(self):
 		#print('>> Stopping')
 		self.api.elev_set_motor_direction(c_int(0))
 
-		# for (int f = 0; f < N_FLOORS; f++) {
-	 #        for (elev_button_type_t b = 0; b < N_BUTTONS; b++){
-	 #            elev_set_button_lamp(b, f, 0);
-	 #        }
-	 #    }
-
-	 #    elev_set_stop_lamp(0);
-	 #    elev_set_door_open_lamp(0);
-	 #    elev_set_floor_indicator(0);
-
 	def reach_defined_state(self): 
 		print('Reaching defined state...')
-		#self.last_floor  	= -1
 		self.defined_state 	= False
 		self.start_time 	= time.time()
 		self.target 		= -1
@@ -219,9 +200,9 @@ class LocalElevator(Elevator):
 			become_defined_thread.daemon = True
 			become_defined_thread.start()
 
-		self.poller = threading.Thread(target = self.poll)
-		self.poller.daemon = True
-		self.poller.start()
+		self.thread = threading.Thread(target = self.run)
+		self.thread.daemon = True
+		self.thread.start()
 
 		print('>> Started local elevator')
 
@@ -243,8 +224,3 @@ def elev_watchdog(socket, event_handler):
 			if (elev.address != socket.local_ip):
 				if (time.time() - elev.last_heartbeat > 3 and not elev.is_disconnected):
 					event_handler.actions['SLAVE DISCONNECTED']({'address': elev.address})
-
-		
-#local_elev.api.elev_set_motor_direction(c_int(1))
-#time.sleep(2)
-#local_elev.api.elev_set_motor_direction(c_int(0))

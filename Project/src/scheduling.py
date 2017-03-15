@@ -34,7 +34,7 @@ class Scheduler:
 		return sorted_elevs
 
 	def get_best_command_for_elev(self, elev):
-		min_cost = 10000000
+		min_cost = 1000000000
 		min_target = -1
 		min_target_dir = 0
 
@@ -69,13 +69,12 @@ class Scheduler:
 
 	def plan_next(self, elev):
 		#print('Current external order matrix:')
-		print('Planning next')
-		pprint(self.order_matrix.external)
-
-		if (elev.target_dir != 0):
-			self.order_matrix.external[elev.target][elev.target_dir] = 1
+		#print('Planning next')
+		#pprint(self.order_matrix.external)
 
 		# If there exists additional implied commands - make them reavailable for selection
+		if (elev.target_dir != 0):
+			self.order_matrix.external[elev.target][elev.target_dir] = 1
 		elif (elev.target != -1):
 			if (self.order_matrix.external[elev.target][1] == 0.5):
 				self.order_matrix.external[elev.target][1] = 1
@@ -98,6 +97,8 @@ class Scheduler:
 				self.order_matrix.external[elev.target][elev.target_dir] = 0.5
 			elif (target != elev.floor):
 				path_dir = 1 if elev.floor < elev.target else -1
+
+				# Setting additional implied commands
 				if (self.order_matrix.external[elev.target][1] == 1 and self.order_matrix.external[elev.target][-1] == 1):
 					self.order_matrix.external[elev.target][path_dir] = 0.5
 				elif (self.order_matrix.external[elev.target][1] == 1):

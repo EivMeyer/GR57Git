@@ -6,8 +6,8 @@ import sys
 import config
 
 def get_local_ip():
-	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	# Connecting to default gateway using UDP
+	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	s.connect(('129.241.187.1', 0))
 	local_ip_address = s.getsockname()[0]
 	return local_ip_address
@@ -25,7 +25,6 @@ class Socket:
 	def tcp_chat(self):
 		# Only for debug purposes
 		while (True):
-			# Fix Python 2.x
 			try:
 				message = raw_input('')
 			except NameError:
@@ -40,48 +39,22 @@ class Socket:
 			connection = self.connections[address]
 			buf = connection.recv(240)
 
-			# except ConnectionResetError:
-			# 	print('Connection lost')
-			# 	if (mode == 'server'):
-			# 		self.event_handler.actions['SLAVE DISCONNECTED']({
-			# 			'connection': 	connection,
-			# 			'address': 		address
-			# 		})
-			# 	elif (mode == 'client'):
-			# 		self.event_handler.actions['MASTER DISCONNECTED']({
-			# 			'connection': 	connection,
-			# 			'address': 		address
-			# 		})
-			# 	return
-
 			try:
 				messages = str(buf.decode('UTF-8')).split('//')
 				for message in messages:
 					if (len(message) > 0):
 						#print('\nmsg: ' + str(address) + ' >> ' + message + '\n')
 						msg = json.loads(message)
+
+						# Storing transmitter address in message
 						msg['data']['address'] = address
+
+						# Reacting on message
 						self.event_handler.actions[msg['title']](msg['data'])
 					
 			except ValueError as e:
-				print('\n')
-				print(msg)
-				print("ERROR: ", e)
-				print('Ignoring')
 				continue
-				print('Connection lost')
-				if (mode == 'server'):
-					self.event_handler.actions['SLAVE DISCONNECTED']({
-						'connection': 	connection,
-						'address': 		address
-					})
-				elif (mode == 'client'):
-					self.event_handler.actions['MASTER DISCONNECTED']({
-						'connection': 	connection,
-						'address': 		address
-					})
-				return
-
+				
 	def udp_receive(self, tcp_socket):
 		udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -118,14 +91,13 @@ class Socket:
 			'data': 	data
 		}
 		msg = json.dumps(msg) + '//'
-		#print('// sending', msg)
 
 		try:
 			connection.send(msg.encode('UTF-8'))
 
 		except Exception as e:
 			print(e)
-			print('IGNORING')
+			print('Ignoring...')
 
 	def tcp_connection_listener(self, tcp_socket):
 		while (True):
@@ -136,7 +108,7 @@ class Socket:
 					'address': 		address
 				})
 			except OSError:
-				# This means that the socket is closed
+				# Occurs when the socket is closed
 				continue
 
 	def tcp_ping_master(self):
@@ -180,7 +152,7 @@ class Socket:
 		tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		tcp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		tcp_socket.bind(('', self.port))
-		tcp_socket.listen(5) # Parameter = max self.connections
+		tcp_socket.listen(5) # Parameter = max connections
 
 		threads = [
 			threading.Thread(target = self.tcp_connection_listener, 	args = [tcp_socket]),
@@ -205,17 +177,18 @@ class Socket:
 
 	def client(self, server_ip):
 		print('Connecting to ' + server_ip + '...')
-		self.is_master 				= False
+		self.is_master = False
 
 		clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-		# Will throw an error if server isn't available
-		clientsocket.settimeout(1)
+		# Timout will throw an error if server isn't available
 		# Setting timeout so that it won't try to connect to the server forever
+		clientsocket.settimeout(1)
 		clientsocket.connect((server_ip, self.port))
-		clientsocket.settimeout(None)
 		# Removing timeout so we don't get unwanted timeouts in tcp_receive
-
+		clientsocket.settimeout(None)
+		
+		# Storing server connection in commenction dictionary
 		self.connections[server_ip] = clientsocket
 
 		threads = [

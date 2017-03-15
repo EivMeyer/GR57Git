@@ -8,11 +8,8 @@ import json
 from pprint import pprint
 
 class EventHandler:
-	# ----------------
-	#   E V E N T S
-	# ----------------
 
-	def _on_chat(self, data): # DEBUG METHOD
+	def _on_chat(self, data): # Debugging method
 		print(data['address'], 'said', data['message'])
 
 		if (data['message'] == 'orders'):
@@ -218,14 +215,11 @@ class EventHandler:
 		try:
 			elevator.Elevator.nodes[data['address']].floor = data['floor']
 		except KeyError as e:
-			print(e)
-			print(data)
-			print('ignoring...')
+			# Occurs if position update is received before elevator is initialized
+			pass
 
 	def _on_local_elev_reached_floor(self, data):
-		print(data['address'])
-		debug = str(elevator.Elevator.nodes[data['address']].dir)
-		print('\n>> Local elevator reached floor ' + str(data['floor']) + ' with dir ' + debug)
+		#print('\n>> Local elevator reached floor ' + str(data['floor']))
 		self.local_elev.api.elev_set_floor_indicator(data['floor'])
 		if (self.socket.is_master):
 			self.actions['ELEV POSITION UPDATE']({
@@ -250,7 +244,6 @@ class EventHandler:
 					'target_dir': 	self.local_elev.target_dir
 				})
 			else:
-				
 				self.socket.tcp_send(
 					address 	= self.socket.server_ip,
 					title 		= 'COMMAND COMPLETED',
@@ -272,15 +265,11 @@ class EventHandler:
 					title 		= 'ELEV REACHED DEFINED STATE',
 					data 		= {}
 				)
-				
-				# self.local_elev.target = -1
-				# self.local_elev.dir = 0
-				# self.local_elev.target_dir = 0
 
 	def _on_command_completed(self, data):
 		print('\nCommand completed (target ' + str(data['target']) + ' target_dir: ' + str(data['target_dir']) + ')')
-		print('Address: ', data['address'])
-		pprint(self.order_matrix.external)
+		#print('Address: ', data['address'])
+		#pprint(self.order_matrix.external)
 
 		if (data['target_dir'] == 0):
 			self.order_matrix.internal[data['address']][data['target']] = 0
@@ -293,8 +282,6 @@ class EventHandler:
 			self.order_matrix.external[data['target']][data['target_dir']] = 0
 		
 		if (self.socket.is_master):
-			
-
 			self.socket.tcp_broadcast(
 				title 		= 'COMMAND COMPLETED',
 				data 		= data
@@ -377,17 +364,17 @@ class EventHandler:
 			elevator.Elevator.nodes[data['address']].floor += 0.5 *  data['dir']
 			elevator.Elevator.nodes[data['address']].dir = data['dir']
 		except KeyError as e:
-			print(e)
-			print('ignoring...')
+			# May occur before elevator has been initialized
+			pass
 
 	def _on_door_closed(self, data):
-		print('<< Door closed2')
+		#print('<< Door closed')
 		if (self.socket.is_master):
 			elevator.Elevator.nodes[data['address']].door_open = False
 			target, target_dir = self.scheduler.plan_next(elevator.Elevator.nodes[data['address']])
 
 			if (data['address'] == self.local_elev.address):
-				print('<< Door closed')
+				#print('<< Door closed')
 				if (target != -1):
 					#print('Commanding elev to ' + str(target) + ' (' + str(target_dir) + ')')
 					self.actions['NEW COMMAND']({
@@ -418,9 +405,6 @@ class EventHandler:
 			)
 
 	def _on_set_lamp_signal(self, data):
-		#print('light', data)
-		# if (data['state'] == 1):
-		# 	raise Exception('qwdqd')
 		self.local_elev.api.elev_set_button_lamp(data['button'], data['floor'], data['state'])
 
 	def _on_set_door(self, data):
@@ -431,8 +415,6 @@ class EventHandler:
 
 	def _on_set_order_state(self, data):
 		pass
-		#if (data['is_internal']):
-			#self.order_matrix.internal[data['ip']][data['target']] = 0
 
 	def _on_local_death(self, data):
 		print('>> Elev death: ' + data['reason'])
@@ -513,7 +495,6 @@ class EventHandler:
 		elevator.Elevator.nodes[data['address']].is_elev_dead = False
 
 	def _on_stop(self, data):
-		print('Commanding STOP!')
 		elevator.Elevator.nodes[data['address']].stop()
 
 	def _on_elev_reached_defined_state(self, data):
@@ -578,5 +559,4 @@ class EventHandler:
 			'LOCAL RESURRECTION': 				self._on_local_resurrection,
 			'RESURRECTION': 					self._on_resurrection,
 			'ELEV REACHED DEFINED STATE': 		self._on_elev_reached_defined_state
-			#'STOP': 						self._on_stop
 		}
