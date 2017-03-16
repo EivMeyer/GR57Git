@@ -157,8 +157,7 @@ class Socket:
 		threads = [
 			threading.Thread(target = self.tcp_connection_listener, 	args = [tcp_socket]),
 			threading.Thread(target = self.tcp_chat, 					args = ()),
-			threading.Thread(target = self.udp_receive,					args = [tcp_socket]),
-			threading.Thread(target = self.broadcast_master_alive, 		args = ())
+			threading.Thread(target = self.udp_receive,					args = [tcp_socket])
 		]
 
 		for thread in threads:
@@ -207,21 +206,6 @@ class Socket:
 
 		# Setting terminal title 
 		sys.stdout.write('\x1b];' + 'CLIENT' + '\x07')
-
-	def broadcast_master_alive(self):
-		while (True):
-			time.sleep(10)
-			for i in range(config.SERVER_HIERARCHY.index(self.local_ip) + 1, len(config.SERVER_HIERARCHY)):
-				ip = config.SERVER_HIERARCHY[i]
-
-				is_already_connected = False
-				for address in self.connections:
-					if (address[0] == ip):
-						is_already_connected = True
-
-				if (not is_already_connected):
-					while (not self.udp_send('MASTER_CONNECTED', ip)):
-						pass
 
 		
 
