@@ -24,10 +24,7 @@ class EventHandler:
 	def _on_ping(self, data):
 		if (self.socket.is_master):
 			#print(data['address'], 'is alive')
-			try:
-				elevator.Elevator.nodes[data['address']].last_heartbeat = time.time()
-			except:
-				pass
+			elevator.Elevator.nodes[data['address']].last_heartbeat = time.time()
 			self.socket.tcp_send(
 				address  	= data['address'],
 				title 		= 'PING',
@@ -205,7 +202,6 @@ class EventHandler:
 	def _on_slave_disconnected(self, data):
 		print(str(data['address'][0]) + ' disconnected from the server')
 
-		del elevator.Elevator.nodes[data['address']]
 		elevator.Elevator.nodes[data['address']].is_disconnected = True
 
 		# Deallocating storage for internal orders
@@ -215,7 +211,6 @@ class EventHandler:
 		self.socket.connect(self.socket.port)
 
 	def _on_master_disconnected(self, data):
-		del elevator.Elevator.nodes[data['address']]
 		self.socket.connect(self.socket.port)
 
 	def _on_elev_position_update(self, data):
