@@ -24,7 +24,10 @@ class EventHandler:
 	def _on_ping(self, data):
 		if (self.socket.is_master):
 			#print(data['address'], 'is alive')
-			elevator.Elevator.nodes[data['address']].last_heartbeat = time.time()
+			try:
+				elevator.Elevator.nodes[data['address']].last_heartbeat = time.time()
+			except:
+				pass
 			self.socket.tcp_send(
 				address  	= data['address'],
 				title 		= 'PING',
@@ -114,8 +117,11 @@ class EventHandler:
 
 	def _on_new_foreign_internal_order(self, data):
 		# Ignoring order if it already exists
-		if (self.order_matrix.internal[data['address']][data['floor']] > 0):
-			return
+		try:
+			if (self.order_matrix.internal[data['address']][data['floor']] > 0):
+				return
+		except:
+			pass
 
 		print('New foreign internal order (floor: ' + str(data['floor']) + ')')
 		self.order_matrix.internal[data['address']][data['floor']] = 1
